@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "972287861800",
+    "project_id": "socialstockmarket-8bf76",
+    "storage_bucket": "socialstockmarket-8bf76.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972287861800:android:80040a164ac56a9169011d",
+        "android_client_info": {
+          "package_name": "hu.bme.aut.android.socialstockmarketapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "972287861800-1l54p6ro5kj922i98fgds8lvoiog9jbm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOF6yUJzLb0B37VBnJX43L_SgV9hwf5Ko"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972287861800-1l54p6ro5kj922i98fgds8lvoiog9jbm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
