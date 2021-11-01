@@ -13,7 +13,7 @@ sealed class StockScreen (val route: String){
     object FriendListScreen: StockScreen("friendlist_screen")
     object StockNewsListScreen: StockScreen("stocknewslist_screen")
     object StockNewsDetailScreen: StockScreen("stocknewsdetail_screen/{newsUrl}")
-    object StockDetailScreen: StockScreen("stockdetail_screen")
+    object StockDetailScreen: StockScreen("stockdetail_screen/{stockSymbol}")
     object CryptoDetailScreen: StockScreen("cryptodetail_screen/{cryptoSymbol}")
 }
 

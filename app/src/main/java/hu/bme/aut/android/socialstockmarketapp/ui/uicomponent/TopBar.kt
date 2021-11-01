@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-    fun TopBar(title: String = "", buttonIcon: ImageVector, scope: CoroutineScope, scaffoldState: ScaffoldState) {
+    fun TopBar(title: String = "", buttonIcon: ImageVector?, scope: CoroutineScope, scaffoldState: ScaffoldState) {
     TopAppBar(
         title = {
             Text(
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
         navigationIcon = {
             IconButton(onClick = {  scope.launch { scaffoldState.drawerState.open() }}
                 ){
-                Icon(buttonIcon, contentDescription = "")
+                buttonIcon?.let { Icon(it, contentDescription = "") }
             }
         },
         backgroundColor = MyBlue,

@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -17,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.BottomNavigationBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.SpinnerView
@@ -41,16 +41,18 @@ fun StockNewsListScreen(navController: NavController) {
     val stockNewsListScreenViewModel = hiltViewModel<StockNewsListScreenViewModel>()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
-    var stockNewsList by remember { mutableStateOf(listOf<MarketNews>()) }
+    var stockNewsList by rememberSaveable { mutableStateOf(listOf<MarketNews>()) }
     val viewState = stockNewsListScreenViewModel.viewState.collectAsState()
     val listState = rememberLazyListState()
-    val categoryList by remember { mutableStateOf(mutableListOf("General", "Forex", "Crypto", "Merger")) }
-    val items by remember { mutableStateOf(mutableListOf<String>()) }
+    val categoryList by rememberSaveable { mutableStateOf(mutableListOf("General", "Forex", "Crypto", "Merger")) }
+    val newsHeadlines by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
+    var editTextValue by rememberSaveable { mutableStateOf("") }
+    //val autoCompleteState by remember { mutableStateOf(AutoCompleteState) }
 
 
-    var autoCompleteEntities by remember  { mutableStateOf(items.asAutoCompleteEntities(
+    var autoCompleteEntities by rememberSaveable  { mutableStateOf(newsHeadlines.asAutoCompleteEntities(
         filter = { item, query ->
-            item.lowercase(Locale.getDefault())?.contains(query.lowercase(Locale.getDefault()))!!
+            item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
         }
     ))}
 
@@ -61,12 +63,12 @@ fun StockNewsListScreen(navController: NavController) {
                     StockNewsListOneShotEvent.DataListReceived -> {
                         stockNewsList = stockNewsListScreenViewModel.stockNewsList
 
-                        for(valami in stockNewsList)
-                            items.add(valami.headline.toString())
-
-                        autoCompleteEntities = items.asAutoCompleteEntities(
+                        newsHeadlines.clear()
+                        for(marketNews in stockNewsList)
+                            newsHeadlines.add(marketNews.headline.toString())
+                        autoCompleteEntities = newsHeadlines.asAutoCompleteEntities(
                             filter = { item, query ->
-                                item?.lowercase(Locale.getDefault())?.contains(query.lowercase(Locale.getDefault()))!!
+                               item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
                             }
                         )
                     }
@@ -77,7 +79,6 @@ fun StockNewsListScreen(navController: NavController) {
             .collect()
     }
 
-    SocialStockMarketAppTheme {
         Surface(color = Color.White) {
             Scaffold(
                 modifier = Modifier.background(Color.White),
@@ -94,26 +95,28 @@ fun StockNewsListScreen(navController: NavController) {
                     Column() {
                         Row(modifier = Modifier.weight(0.065f)) {
                             SpinnerView(
-                                dropDownList = categoryList, onSpinnerItemSelected = { stockNewsListScreenViewModel.onAction(StockNewsListUiAction.SpinnerSelected(it)) },
+                                dropDownList = categoryList, onSpinnerItemSelected = {
+                                    editTextValue = ""
+                                    stockNewsListScreenViewModel.onAction(StockNewsListUiAction.SpinnerSelected(it)) },
                                 spinnerTitle = "News Category"
                             )
                         }
                         Row() {
-                            if (!autoCompleteEntities.isEmpty()) {
+                            if(stockNewsList.isNotEmpty()) {
                                 AutoCompleteBox(
                                     items = autoCompleteEntities,
                                     itemContent = { item ->
                                         ValueAutoCompleteItem(item.value)
                                     }
                                 ) {
-                                    var value by remember { mutableStateOf("") }
+
                                     val view = LocalView.current
 
                                     onItemSelected { item ->
-                                        value = item.value
-                                        filter(value)
+                                        editTextValue = item.value
+                                        filter(editTextValue)
                                         stockNewsList = stockNewsListScreenViewModel.stockNewsList.filter {
-                                            it.headline?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                            it.headline?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                         }
                                         view.clearFocus()
                                     }
@@ -122,25 +125,27 @@ fun StockNewsListScreen(navController: NavController) {
                                         modifier = Modifier
                                             .testTag(AutoCompleteSearchBarTag)
                                             .padding(start = 12.dp),
-                                        value = value,
+                                        value = editTextValue,
                                         label = "Search in Headline",
                                         onDoneActionClick = {
                                             view.clearFocus()
                                         },
                                         onClearClick = {
-                                            value = ""
-                                            filter(value)
+                                            editTextValue = ""
+                                            stockNewsList = stockNewsListScreenViewModel.stockNewsList
+                                            filter(editTextValue)
 
                                             view.clearFocus()
                                         },
                                         onFocusChanged = { focusState ->
                                             isSearching = focusState.isFocused
+
                                         },
                                         onValueChanged = { query ->
-                                            value = query
-                                            filter(value)
+                                            editTextValue = query
+                                            filter(editTextValue)
                                             stockNewsList = stockNewsListScreenViewModel.stockNewsList.filter {
-                                                it.headline?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                                it.headline?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                             }
                                         }
                                     )
@@ -150,23 +155,18 @@ fun StockNewsListScreen(navController: NavController) {
                         if (viewState.value.isLoading)
                             CircularIndeterminateProgressBar(isDisplayed = true)
                         else {
-                            Row(modifier = Modifier.padding(bottom = 50.dp, top = 20.dp).weight(0.8f)) {
+                            Row(modifier = Modifier
+                                .padding(bottom = 50.dp, top = 20.dp)
+                                .weight(0.8f)) {
                                 StockNewsList(stockNewsList = stockNewsList, listState = listState,
                                     onRowItemClick = { newsUrl ->
                                         val url = URLEncoder.encode(newsUrl, StandardCharsets.UTF_8.toString())
-                                        navController.navigate("stocknewsdetail_screen/$url") {
-                                            popUpTo("login_screen") {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
+                                        navController.navigate("stocknewsdetail_screen/$url")
                                     })
-                            }
+                                }
                         }
                     }
                 })
-        }
     }
 }
 

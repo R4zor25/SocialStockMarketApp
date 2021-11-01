@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.finnhub.api.apis.DefaultApi
 import io.finnhub.api.infrastructure.ApiClient
-import io.finnhub.api.models.MarketNews
+import io.finnhub.api.models.CompanyProfile2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
@@ -27,11 +27,49 @@ class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
 
     val apiClient = DefaultApi()
 
-    var stockNewsList = listOf<MarketNews>()
+    var symbol: String = ""
+
+    var companyProfile : CompanyProfile2? = null
+
+    /*MILYEN API HÍVÁSOK IDE
+     Céges adatok a tetejére --> CompanyProfile2
+        Name
+        weburl
+        logo
+        currency
+        exchange
+        country
+      Real Time adat a cégről --> Quote --ez mehet erre a screenre még szerintem
+
+    CÉGHÍREK --> CompanyNews
+        Ugynaz maradhat + idő, mivel kell datepicker, emiatt lehet másik screen kéne
+
+    ÁLTALÁNOS cég adatok --> Basic Financials
+        Current Ratio
+        salesPerShare
+        netMargin
+        metricben
+            10 day average trading volume
+            52 week high
+            52week low, and date
+            52 week price return daily
+            beta??
+    Nyereség, veszteség --> Financials as reported, lehet nem kell
+
+    Social Sentiment --> Vélemények az adott cégről --> Külön screen-en jó lesz
+
+
+    Cég gyertája --> Candles --> Külön Screen --> Diagram hozzá
+    Adott cégnél piaci tendenciák --> Mit érdemes --> Külön Screen Jobb
+    Beszélgetés
+*/
+
 
 
     init {
-        onAction(StockDetailUiAction.OnInit())
+        coroutineScope.launch {
+            _oneShotEvents.send(StockDetailOneShotEvent.AcquireSymbol)
+        }
     }
 
     fun onAction(stockDetailUiAction: StockDetailUiAction){
@@ -39,8 +77,9 @@ class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
             is StockDetailUiAction.OnInit ->{
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
-                    //TODO Load datas from diff Api calls
-                    ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
+                    ApiClient.apiKey["token"] = "c5vrl32ad3ibtqnndf0g"
+                    companyProfile = apiClient.companyProfile2(symbol, null, null)
+                    _oneShotEvents.send(StockDetailOneShotEvent.CompanyInfoReceived(companyProfile!!))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }

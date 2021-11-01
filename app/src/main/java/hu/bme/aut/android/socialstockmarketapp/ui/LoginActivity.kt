@@ -83,8 +83,9 @@ class LoginActivity : ComponentActivity() {
                         }
                         composable(
                             route = StockScreen.StockDetailScreen.route
-                        ) {
-                            StockDetailScreen(navController)
+                        ) { backStackEntry ->
+                            val stockSymbol = backStackEntry.arguments?.getString("stockSymbol")
+                            StockDetailScreen(navController, stockSymbol)
                         }
                         composable(
                             route = StockScreen.CryptoDetailScreen.route

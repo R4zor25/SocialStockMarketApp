@@ -14,6 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -24,7 +25,7 @@ import androidx.compose.ui.unit.sp
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 fun SpinnerView(dropDownList: MutableList<String>, onSpinnerItemSelected : (String) -> Unit, spinnerTitle: String) {
-    var sampleName: String by remember { mutableStateOf(dropDownList[0]) }
+    var sampleName: String by rememberSaveable { mutableStateOf(dropDownList[0]) }
     var expanded by remember { mutableStateOf(false) }
     val transitionState = remember {
         MutableTransitionState(expanded).apply {

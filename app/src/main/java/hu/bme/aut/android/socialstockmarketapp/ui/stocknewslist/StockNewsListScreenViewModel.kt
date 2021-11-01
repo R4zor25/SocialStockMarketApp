@@ -1,6 +1,5 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.finnhub.api.apis.DefaultApi
@@ -45,8 +44,6 @@ class StockNewsListScreenViewModel @Inject constructor(): ViewModel() {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
                     stockNewsList = apiClient.marketNews("general", 0)
-                    if(stockNewsList.isEmpty())
-                        Log.d("TAGGA", "Hát ez üres")
                     _oneShotEvents.send(StockNewsListOneShotEvent.DataListReceived)
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }

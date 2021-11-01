@@ -32,7 +32,7 @@ class StockListScreenViewModel @Inject constructor(private val authInteractor: A
     /*API IDEAS
     SymbolLookUp --> Részvény keresés legjobban matchelő a név alapján--> Kellhet
         Céges adatokat lehet lekérni(CompanyProfile2) --> Erre fel elhet húzni egy Screen-t
-        Tőzsdehíreket lehet lekérni(MarketNews) --> Lehet az egyik kezdőképernyő, ami egy webview-ra irányít ?
+        Tőzsdehíreket lehet lekérni(MarketNews) --> Lehet az egyik kezdőképernyő, ami egy webview-ra irányít ? --> DONE
         Cég hírek ? eh(CompanyNews) --> Nem hiszem
         PEERS -> Hasonló cégek lekérése az adott országban
         Adott cég általános adatait Dátumtól dátumig(BasicFinancials) --> Részletes képernyőre jó lehet nagyon
@@ -58,6 +58,14 @@ class StockListScreenViewModel @Inject constructor(private val authInteractor: A
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5o81hqad3i92b40uth0"
                     stockSymbolList = apiClient.stockSymbols("US", "", "", "")
+                    _oneShotEvents.send(StockListOneShotEvent.DataListReceived)
+                    _viewState.value = _viewState.value.copy(isLoading = false)
+                }
+            }
+            is StockListUiAction.SpinnerSelected -> {
+                coroutineScope.launch(Dispatchers.IO) {
+                    _viewState.value = _viewState.value.copy(isLoading = true)
+                    stockSymbolList = apiClient.stockSymbols(stockListUiAction.spinnerName, "", "", "")
                     _oneShotEvents.send(StockListOneShotEvent.DataListReceived)
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }

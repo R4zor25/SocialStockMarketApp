@@ -1,7 +1,9 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.cryptostocklist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -10,25 +12,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
+import hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist.ValueAutoCompleteItem
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.BottomNavigationBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.SpinnerView
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteBox
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteSearchBarTag
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.asAutoCompleteEntities
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists.CryptoSymbolList
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.searchbar.TextSearchBar
 import io.finnhub.api.models.CryptoSymbol
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import java.util.*
 
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
 @InternalCoroutinesApi
 @Composable
 fun CryptoStockListScreen(navController: NavController) {
@@ -46,6 +53,12 @@ fun CryptoStockListScreen(navController: NavController) {
             )
         )
     }
+    val cryptoSymbols by remember { mutableStateOf(mutableListOf<String>()) }
+    var autoCompleteEntities by remember  { mutableStateOf(cryptoSymbols.asAutoCompleteEntities(
+        filter = { item, query ->
+            item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
+        }
+    ))}
 
     LaunchedEffect("key") {
         cryptoStockListScreenViewModel.oneShotEvent
@@ -53,14 +66,22 @@ fun CryptoStockListScreen(navController: NavController) {
                 when (it) {
                     CryptoStockListOneShotEvent.DataListReceived -> {
                         cryptoSymbolList = cryptoStockListScreenViewModel.cryptoSymbolList
+                        for(symbol in cryptoSymbolList)
+                            cryptoSymbols.add(symbol.displaySymbol.toString())
+
+                        autoCompleteEntities = cryptoSymbols.asAutoCompleteEntities(
+                            filter = { item, query ->
+                                item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
+                            }
+                        )
                     }
-                    else -> { }
+                    else -> {
+                    }
                 }
             }
             .collect()
     }
 
-    SocialStockMarketAppTheme {
         Surface(color = Color.White) {
             Scaffold(
                 modifier = Modifier.background(Color.White),
@@ -74,49 +95,78 @@ fun CryptoStockListScreen(navController: NavController) {
                     BottomNavigationBar(navController = navController)
                 }, content = { _ ->
 
-                    ConstraintLayout {
-                        val (spinner, newsList) = createRefs()
 
-                        Row(modifier = Modifier.constrainAs(spinner) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            height = Dimension.value(80.dp)
-                        }) {
-                            SpinnerView(dropDownList =  categoryList, onSpinnerItemSelected =  { cryptoStockListScreenViewModel.onAction(CryptoStockListUiAction.SpinnerSelected(it)) },
-                            spinnerTitle = "Exchange")
+                    Column() {
+                        Row(modifier = Modifier.weight(0.065f)) {
+                            SpinnerView(
+                                dropDownList = categoryList, onSpinnerItemSelected = { cryptoStockListScreenViewModel.onAction(CryptoStockListUiAction.SpinnerSelected(it)) },
+                                spinnerTitle = "Exchange"
+                            )
+                        }
+                        Row() {
+                            if (cryptoSymbolList.isNotEmpty()) {
+                                AutoCompleteBox(
+                                    items = autoCompleteEntities,
+                                    itemContent = { item ->
+                                        ValueAutoCompleteItem(item.value)
+                                    }
+                                ) {
+                                    var value by remember { mutableStateOf("") }
+                                    val view = LocalView.current
+
+                                    onItemSelected { item ->
+                                        value = item.value
+                                        filter(value)
+                                        cryptoSymbolList = cryptoStockListScreenViewModel.cryptoSymbolList.filter {
+                                            it.displaySymbol?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                        }
+                                        view.clearFocus()
+                                    }
+
+                                    TextSearchBar(
+                                        modifier = Modifier
+                                            .testTag(AutoCompleteSearchBarTag)
+                                            .padding(start = 12.dp),
+                                        value = value,
+                                        label = "Search in Crypto Exchanges",
+                                        onDoneActionClick = {
+                                            view.clearFocus()
+                                        },
+                                        onClearClick = {
+                                            value = ""
+                                            filter(value)
+
+                                            view.clearFocus()
+                                        },
+                                        onFocusChanged = { focusState ->
+                                            isSearching = focusState.isFocused
+                                        },
+                                        onValueChanged = { query ->
+                                            value = query
+                                            filter(value)
+                                            cryptoSymbolList = cryptoStockListScreenViewModel.cryptoSymbolList.filter {
+                                                it.displaySymbol?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                            }
+                                        }
+                                    )
+                                }
+                            }
                         }
                         if (viewState.value.isLoading)
                             CircularIndeterminateProgressBar(isDisplayed = true)
                         else {
-                            Row(modifier = Modifier.constrainAs(newsList) {
-                                top.linkTo(spinner.bottom)
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                            }) {
-
-                                CryptoSymbolList(cryptoSymbolList = cryptoSymbolList, onGridItemClicked = { cryptoSymbol ->
-                                    navController.navigate("cryptodetail_screen/$cryptoSymbol")},
-                                    listState = listState)
-                                /*
-                                StockNewsList(stockNewsList = stockNewsList, listState = listState,
-                                    onRowItemClick = { newsUrl ->
-                                        val url = URLEncoder.encode(newsUrl, StandardCharsets.UTF_8.toString())
-                                        navController.navigate("stocknewsdetail_screen/$url") {
-                                            popUpTo("login_screen") {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    })
-                                    88
-                                 */
+                            Row(modifier = Modifier
+                                .padding(bottom = 50.dp, top = 20.dp)
+                                .weight(0.8f)) {
+                                CryptoSymbolList(
+                                    cryptoSymbolList = cryptoSymbolList, onGridItemClicked = { cryptoSymbol ->
+                                        navController.navigate("cryptodetail_screen/$cryptoSymbol")
+                                    },
+                                    listState = listState
+                                )
                             }
                         }
                     }
                 })
-        }
     }
 }
