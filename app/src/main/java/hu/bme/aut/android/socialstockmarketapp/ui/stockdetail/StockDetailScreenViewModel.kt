@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.finnhub.api.apis.DefaultApi
 import io.finnhub.api.infrastructure.ApiClient
 import io.finnhub.api.models.CompanyProfile2
+import io.finnhub.api.models.Quote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
@@ -19,7 +20,7 @@ class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<StockDetailScreenViewState> = MutableStateFlow(StockDetailScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<StockDetailScreenViewState> = MutableStateFlow(StockDetailScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<StockDetailOneShotEvent>(Channel.BUFFERED)
@@ -58,7 +59,6 @@ class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
 
     Social Sentiment --> Vélemények az adott cégről --> Külön screen-en jó lesz
 
-
     Cég gyertája --> Candles --> Külön Screen --> Diagram hozzá
     Adott cégnél piaci tendenciák --> Mit érdemes --> Külön Screen Jobb
     Beszélgetés
@@ -79,8 +79,16 @@ class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5vrl32ad3ibtqnndf0g"
                     companyProfile = apiClient.companyProfile2(symbol, null, null)
-                    _oneShotEvents.send(StockDetailOneShotEvent.CompanyInfoReceived(companyProfile!!))
-                    _viewState.value = _viewState.value.copy(isLoading = false)
+                    if(companyProfile!!.currency == null && companyProfile!!.name == null && companyProfile!!.exchange == null ) {
+                        _viewState.value = _viewState.value.copy(isLoading = false)
+                    } else {
+                        var quote: Quote = Quote()
+                        quote = apiClient.quote(symbol)
+                        _oneShotEvents.send(StockDetailOneShotEvent.QuoteInfoReceived(quote))
+                        _oneShotEvents.send(StockDetailOneShotEvent.CompanyInfoReceived(companyProfile!!))
+                        _viewState.value = _viewState.value.copy(isLoading = false)
+                        _viewState.value = _viewState.value.copy(isDataAvailable = true)
+                    }
                 }
             }
         }

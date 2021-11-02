@@ -1,4 +1,4 @@
-package hu.bme.aut.android.socialstockmarketapp.ui.cryptodetails
+package hu.bme.aut.android.socialstockmarketapp.ui.generalstockinformation
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,29 +14,31 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CryptoDetailViewModel @Inject constructor(): ViewModel() {
+class GeneralStockInformationScreenViewModel @Inject constructor(): ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<CryptoDetailViewState> = MutableStateFlow(CryptoDetailViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<GeneralStockInformationScreenViewState> = MutableStateFlow(GeneralStockInformationScreenViewState(errorText = ""))
     val viewState = _viewState.asStateFlow()
 
-    private val _oneShotEvents = Channel<CryptoDetailOneShotEvent>(Channel.BUFFERED)
+    private val _oneShotEvents = Channel<GeneralStockInformationOneShotEvent>(Channel.BUFFERED)
     val oneShotEvent = _oneShotEvents.receiveAsFlow()
 
     val apiClient = DefaultApi()
 
 
     init {
-        onAction(CryptoDetailUiAction.OnInit())
+        onAction(GeneralStockInformationUiAction.OnInit())
     }
 
-    fun onAction(cryptoDetailUiAction: CryptoDetailUiAction){
-        when(cryptoDetailUiAction){
-            is CryptoDetailUiAction.OnInit ->{
+    fun onAction(generalStockInformationUiAction: GeneralStockInformationUiAction){
+        when(generalStockInformationUiAction){
+            is GeneralStockInformationUiAction.OnInit ->{
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
+                    //TODO API hívás és one shot event
+                    //_oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }

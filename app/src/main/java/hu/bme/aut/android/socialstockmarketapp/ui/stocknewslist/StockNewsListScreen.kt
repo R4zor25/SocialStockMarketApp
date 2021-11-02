@@ -47,14 +47,15 @@ fun StockNewsListScreen(navController: NavController) {
     val categoryList by rememberSaveable { mutableStateOf(mutableListOf("General", "Forex", "Crypto", "Merger")) }
     val newsHeadlines by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
     var editTextValue by rememberSaveable { mutableStateOf("") }
-    //val autoCompleteState by remember { mutableStateOf(AutoCompleteState) }
 
 
-    var autoCompleteEntities by rememberSaveable  { mutableStateOf(newsHeadlines.asAutoCompleteEntities(
-        filter = { item, query ->
-            item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
-        }
-    ))}
+    var autoCompleteEntities by rememberSaveable {
+        mutableStateOf(newsHeadlines.asAutoCompleteEntities(
+            filter = { item, query ->
+                item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
+            }
+        ))
+    }
 
     LaunchedEffect("key") {
         stockNewsListScreenViewModel.oneShotEvent
@@ -64,11 +65,11 @@ fun StockNewsListScreen(navController: NavController) {
                         stockNewsList = stockNewsListScreenViewModel.stockNewsList
 
                         newsHeadlines.clear()
-                        for(marketNews in stockNewsList)
+                        for (marketNews in stockNewsList)
                             newsHeadlines.add(marketNews.headline.toString())
                         autoCompleteEntities = newsHeadlines.asAutoCompleteEntities(
                             filter = { item, query ->
-                               item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
+                                item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
                             }
                         )
                     }
@@ -79,94 +80,96 @@ fun StockNewsListScreen(navController: NavController) {
             .collect()
     }
 
-        Surface(color = Color.White) {
-            Scaffold(
-                modifier = Modifier.background(Color.White),
-                scaffoldState = scaffoldState,
-                topBar = { TopBar("Stock Market News", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
-                drawerBackgroundColor = Color.White,
-                drawerContent = {
-                    NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
-                },
-                bottomBar = {
-                    BottomNavigationBar(navController = navController)
-                }, content = { _ ->
+    Surface(color = Color.White) {
+        Scaffold(
+            modifier = Modifier.background(Color.White),
+            scaffoldState = scaffoldState,
+            topBar = { TopBar("Stock Market News", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+            drawerBackgroundColor = Color.White,
+            drawerContent = {
+                NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
+            },
+            bottomBar = {
+                BottomNavigationBar(navController = navController)
+            }, content = { _ ->
 
-                    Column() {
-                        Row(modifier = Modifier.weight(0.065f)) {
-                            SpinnerView(
-                                dropDownList = categoryList, onSpinnerItemSelected = {
-                                    editTextValue = ""
-                                    stockNewsListScreenViewModel.onAction(StockNewsListUiAction.SpinnerSelected(it)) },
-                                spinnerTitle = "News Category"
-                            )
-                        }
-                        Row() {
-                            if(stockNewsList.isNotEmpty()) {
-                                AutoCompleteBox(
-                                    items = autoCompleteEntities,
-                                    itemContent = { item ->
-                                        ValueAutoCompleteItem(item.value)
+                Column() {
+                    Row(modifier = Modifier.weight(0.065f)) {
+                        SpinnerView(
+                            dropDownList = categoryList, onSpinnerItemSelected = {
+                                editTextValue = ""
+                                stockNewsListScreenViewModel.onAction(StockNewsListUiAction.SpinnerSelected(it))
+                            },
+                            spinnerTitle = "News Category"
+                        )
+                    }
+                    Row() {
+                        if (!viewState.value.isLoading) {
+                            AutoCompleteBox(
+                                items = autoCompleteEntities,
+                                itemContent = { item ->
+                                    ValueAutoCompleteItem(item.value)
+                                }
+                            ) {
+
+                                val view = LocalView.current
+
+                                onItemSelected { item ->
+                                    editTextValue = item.value
+                                    filter(editTextValue)
+                                    stockNewsList = stockNewsListScreenViewModel.stockNewsList.filter {
+                                        it.headline?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                     }
-                                ) {
+                                    view.clearFocus()
+                                }
 
-                                    val view = LocalView.current
+                                TextSearchBar(
+                                    modifier = Modifier
+                                        .testTag(AutoCompleteSearchBarTag)
+                                        .padding(start = 12.dp),
+                                    value = editTextValue,
+                                    label = "Search in Headline",
+                                    onDoneActionClick = {
+                                        view.clearFocus()
+                                    },
+                                    onClearClick = {
+                                        editTextValue = ""
+                                        stockNewsList = stockNewsListScreenViewModel.stockNewsList
+                                        filter(editTextValue)
 
-                                    onItemSelected { item ->
-                                        editTextValue = item.value
+                                        view.clearFocus()
+                                    },
+                                    onFocusChanged = { focusState ->
+                                        isSearching = focusState.isFocused
+
+                                    },
+                                    onValueChanged = { query ->
+                                        editTextValue = query
                                         filter(editTextValue)
                                         stockNewsList = stockNewsListScreenViewModel.stockNewsList.filter {
                                             it.headline?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                         }
-                                        view.clearFocus()
                                     }
-
-                                    TextSearchBar(
-                                        modifier = Modifier
-                                            .testTag(AutoCompleteSearchBarTag)
-                                            .padding(start = 12.dp),
-                                        value = editTextValue,
-                                        label = "Search in Headline",
-                                        onDoneActionClick = {
-                                            view.clearFocus()
-                                        },
-                                        onClearClick = {
-                                            editTextValue = ""
-                                            stockNewsList = stockNewsListScreenViewModel.stockNewsList
-                                            filter(editTextValue)
-
-                                            view.clearFocus()
-                                        },
-                                        onFocusChanged = { focusState ->
-                                            isSearching = focusState.isFocused
-
-                                        },
-                                        onValueChanged = { query ->
-                                            editTextValue = query
-                                            filter(editTextValue)
-                                            stockNewsList = stockNewsListScreenViewModel.stockNewsList.filter {
-                                                it.headline?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
-                                            }
-                                        }
-                                    )
-                                }
+                                )
                             }
                         }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .padding(bottom = 50.dp, top = 20.dp)
+                            .weight(0.8f)
+                    ) {
                         if (viewState.value.isLoading)
                             CircularIndeterminateProgressBar(isDisplayed = true)
-                        else {
-                            Row(modifier = Modifier
-                                .padding(bottom = 50.dp, top = 20.dp)
-                                .weight(0.8f)) {
-                                StockNewsList(stockNewsList = stockNewsList, listState = listState,
-                                    onRowItemClick = { newsUrl ->
-                                        val url = URLEncoder.encode(newsUrl, StandardCharsets.UTF_8.toString())
-                                        navController.navigate("stocknewsdetail_screen/$url")
-                                    })
-                                }
-                        }
+                        else
+                            StockNewsList(stockNewsList = stockNewsList, listState = listState,
+                                onRowItemClick = { newsUrl ->
+                                    val url = URLEncoder.encode(newsUrl, StandardCharsets.UTF_8.toString())
+                                    navController.navigate("stocknewsdetail_screen/$url")
+                                })
                     }
-                })
+                }
+            })
     }
 }
 
@@ -185,6 +188,6 @@ fun ValueAutoCompleteItem(item: String) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 @Preview
-fun Preview(){
+fun Preview() {
     StockNewsListScreen(navController = NavController(LocalContext.current))
 }

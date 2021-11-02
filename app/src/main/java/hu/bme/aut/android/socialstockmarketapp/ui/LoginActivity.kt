@@ -13,14 +13,20 @@ import dagger.hilt.android.AndroidEntryPoint
 import hu.bme.aut.android.socialstockmarketapp.navigation.StockScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.auth.login.LoginScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.auth.registration.RegistrationScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.companynews.CompanyNewsScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.cryptodetails.CryptoDetailScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.cryptostocklist.CryptoStockListScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.followedstocks.FollowedStocksScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.friends.FriendListScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.generalstockinformation.GeneralStockInformationScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.mystocklist.MyStockListScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.stockconversation.StockConversationScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockdetail.StockDetailScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.stockgraph.StockGraphScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stocklist.StockListScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stocknewsdetail.StockNewsDetailScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist.StockNewsListScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.stocksocialsentiment.StockSocialSentimentScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -92,6 +98,41 @@ class LoginActivity : ComponentActivity() {
                         ){ backStackEntry ->
                             val cryptoSymbol = backStackEntry.arguments?.getString("cryptoSymbol")
                             CryptoDetailScreen(navController, cryptoSymbol)
+                        }
+                        composable(
+                            route = StockScreen.CompanyNewsScreen.route
+                        ){ backStackEntry ->
+                            val companySymbol = backStackEntry.arguments?.getString("companySymbol")
+                            CompanyNewsScreen(navController, companySymbol!!)
+                        }
+                        composable(
+                            route = StockScreen.StockSocialSentimentScreen.route
+                        ){ backStackEntry ->
+                            val companySymbol = backStackEntry.arguments?.getString("companySymbol")
+                            StockSocialSentimentScreen(navController, companySymbol!!)
+                        }
+                        composable(
+                            route = StockScreen.StockConversationScreen.route
+                        ){ backStackEntry ->
+                            val companySymbol = backStackEntry.arguments?.getString("companySymbol")
+                            StockConversationScreen(navController, companySymbol!!)
+                        }
+                        composable(
+                            route = StockScreen.StockGraphScreen.route
+                        ){ backStackEntry ->
+                            val companySymbol = backStackEntry.arguments?.getString("companySymbol")
+                            StockGraphScreen(navController, companySymbol!!)
+                        }
+                        composable(
+                            route = StockScreen.GeneralStockInformationScreen.route
+                        ){ backStackEntry ->
+                            val companySymbol = backStackEntry.arguments?.getString("companySymbol")
+                            GeneralStockInformationScreen(navController, companySymbol!!)
+                        }
+                        composable(
+                            route = StockScreen.FollowedStocksScreen.route
+                        ) {
+                            FollowedStocksScreen(navController)
                         }
                     }
                 }

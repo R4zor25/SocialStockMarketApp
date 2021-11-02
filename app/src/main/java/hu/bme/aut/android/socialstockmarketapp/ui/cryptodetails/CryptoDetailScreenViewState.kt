@@ -1,6 +1,6 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.cryptodetails
 
-data class CryptoDetailViewState(val isLoading: Boolean = false, var errorText: String?)
+data class CryptoDetailScreenViewState(val isLoading: Boolean = false, var errorText: String?)
 
 sealed class CryptoDetailOneShotEvent{
     object DataListReceived: CryptoDetailOneShotEvent()

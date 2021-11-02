@@ -15,6 +15,12 @@ sealed class StockScreen (val route: String){
     object StockNewsDetailScreen: StockScreen("stocknewsdetail_screen/{newsUrl}")
     object StockDetailScreen: StockScreen("stockdetail_screen/{stockSymbol}")
     object CryptoDetailScreen: StockScreen("cryptodetail_screen/{cryptoSymbol}")
+    object CompanyNewsScreen: StockScreen("companynews_screen/{companySymbol}")
+    object StockSocialSentimentScreen: StockScreen("stocksocialsentiment_screen/{companySymbol}")
+    object StockConversationScreen: StockScreen("stockconversation_screen/{companySymbol}")
+    object StockGraphScreen: StockScreen("stockgraph_screen/{companySymbol}")
+    object GeneralStockInformationScreen: StockScreen("generalstockinformation_screen/{companySymbol}")
+    object FollowedStocksScreen: StockScreen("followedstocks_screen")
 }
 
 data class BottomNavItem(

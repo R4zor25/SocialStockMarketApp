@@ -52,8 +52,8 @@ fun StockListScreen(navController: NavController) {
             )
         )
     }
-    val stockTitles by remember { mutableStateOf(mutableListOf<String>()) }
-    var autoCompleteEntities by remember {
+    val stockTitles by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
+    var autoCompleteEntities by rememberSaveable {
         mutableStateOf(stockTitles.asAutoCompleteEntities(
             filter = { item, query ->
                 item.lowercase(Locale.getDefault()).contains(query.lowercase(Locale.getDefault()))
@@ -69,6 +69,7 @@ fun StockListScreen(navController: NavController) {
                     StockListOneShotEvent.DataListReceived -> {
                         stockList = stockListScreenViewModel.stockSymbolList
 
+                        stockTitles.clear()
                         for (stock in stockList)
                             stockTitles.add(stock.description.toString())
 
@@ -102,7 +103,7 @@ fun StockListScreen(navController: NavController) {
                                 spinnerTitle = "Exchange Location"
                             )
                         }
-                        if(stockList.isNotEmpty()){
+                        if(!viewState.value.isLoading){
                         Row() {
                             AutoCompleteBox(
                                 items = autoCompleteEntities,
@@ -134,7 +135,9 @@ fun StockListScreen(navController: NavController) {
                                     onClearClick = {
                                         value = ""
                                         filter(value)
-
+                                        stockList = stockListScreenViewModel.stockSymbolList.filter {
+                                            it.description?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                        }
                                         view.clearFocus()
                                     },
                                     onFocusChanged = { focusState ->
@@ -151,13 +154,13 @@ fun StockListScreen(navController: NavController) {
                             }
                         }
                         }
-                        if (viewState.value.isLoading)
-                            CircularIndeterminateProgressBar(isDisplayed = true)
-                        else
                             Row(modifier = Modifier
                                 .padding(bottom = 50.dp, top = 20.dp)
                                 .weight(0.8f)) {
-                                MainStockList(stockSymbolList = stockList, onRowItemClick = { stockSymbol -> navController.navigate("stockdetail_screen/$stockSymbol") })
+                                if (viewState.value.isLoading)
+                                    CircularIndeterminateProgressBar(isDisplayed = true)
+                                else
+                                    MainStockList(stockSymbolList = stockList, onRowItemClick = { stockSymbol -> navController.navigate("stockdetail_screen/$stockSymbol") })
                             }
                     }
                 }
