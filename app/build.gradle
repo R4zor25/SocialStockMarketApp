@@ -139,6 +139,12 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc01"
 
 
+    //Datepicker
+    implementation "io.github.vanpra.compose-material-dialogs:datetime:0.6.1"
+    implementation "io.github.vanpra.compose-material-dialogs:core:0.6.1"
+    implementation "io.github.vanpra.compose-material-dialogs:color:0.6.1"
+
+
 
 
 

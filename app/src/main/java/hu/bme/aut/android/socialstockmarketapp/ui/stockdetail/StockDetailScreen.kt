@@ -3,11 +3,15 @@ package hu.bme.aut.android.socialstockmarketapp.ui.stockdetail
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,7 +76,7 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
     }
     Scaffold(
         modifier = Modifier.background(Color.White),
-        topBar = { TopBar("Stock Details", buttonIcon = null, scope, scaffoldState) },
+        topBar = { TopBar("Stock Details", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
         content = {
 
             Column(
@@ -80,6 +84,7 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                     .fillMaxSize()
                     .background(Color.White)
                     .padding(top = 12.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 if (!viewState.value.isLoading && !viewState.value.isDataAvailable) {
                     Text(
@@ -216,9 +221,9 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                             }
                         }
                         
-                        StockDetailRowItem(title = "Company related news") {}
+                        StockDetailRowItem(title = "Company related news") { navController.navigate("companynews_screen/$stockSymbol")}
                         StockDetailRowItem(title = "More general stock informations") {}
-                        StockDetailRowItem(title = "Company's social sentiment") {}
+                        StockDetailRowItem(title = "Company's social sentiment") {navController.navigate("stocksocialsentiment_screen/$stockSymbol")}
                         StockDetailRowItem(title = "Stock graph") {}
                         StockDetailRowItem(title = "Stock advice") {}
                         StockDetailRowItem(title = "Conversation about stock") {}

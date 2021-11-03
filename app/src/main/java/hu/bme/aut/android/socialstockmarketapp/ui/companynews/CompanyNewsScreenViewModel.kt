@@ -12,9 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,39 +31,38 @@ class CompanyNewsScreenViewModel @Inject constructor(): ViewModel() {
 
     var companyNewsList = listOf<CompanyNews>()
 
-    val l1 = LocalDate.parse("14-02-2018", DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-
-    val unix1 = l1.atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
-    val l2 = LocalDate.parse("14-01-2019", DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-
-    val unix2 = l2.atStartOfDay(ZoneId.systemDefault()).toInstant().epochSecond
-
-
-
+    var stockSymbol: String = ""
 
     init {
-        onAction(CompanyNewsUiAction.OnInit())
+        coroutineScope.launch {
+            _oneShotEvents.send(CompanyNewsOneShotEvent.AcquireSymbol)
+        }
     }
 
     fun onAction(companyNewsUiAction: CompanyNewsUiAction){
         when(companyNewsUiAction){
             is CompanyNewsUiAction.OnInit ->{
                 coroutineScope.launch(Dispatchers.IO) {
+                    val pattern = "yyyy-MM-dd"
+                    val simpleDateFormat = SimpleDateFormat(pattern)
+                    val lastyear: String = calcLastYear()
+                    val date: String = simpleDateFormat.format(Date())
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    companyNewsList = apiClient.companyNews("AAPL", unix1.toString(), unix2.toString() )
+                    companyNewsList = apiClient.companyNews(stockSymbol, from = lastyear, to = date )
                     _oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }
-            is CompanyNewsUiAction.SpinnerSelected -> {
-                coroutineScope.launch(Dispatchers.IO) {
-                    _viewState.value = _viewState.value.copy(isLoading = true)
-                    //companyNewsList = apiClient.marketNews(stockNewsListUiAction.spinnerName.lowercase(Locale.getDefault()), 0)
-                    //_oneShotEvents.send(StockNewsListOneShotEvent.DataListReceived)
-                    _viewState.value = _viewState.value.copy(isLoading = false)
-                }
-            }
         }
+    }
+
+    private fun calcLastYear(): String {
+        val cal = Calendar.getInstance()
+        cal.time = Date()
+        cal.add(Calendar.YEAR, -1)
+        val pattern = "yyyy-MM-dd"
+        val simpleDateFormat = SimpleDateFormat(pattern)
+        return simpleDateFormat.format(cal.time)
     }
 }

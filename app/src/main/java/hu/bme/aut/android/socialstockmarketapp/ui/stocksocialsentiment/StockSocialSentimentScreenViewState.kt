@@ -7,6 +7,7 @@ data class StockSocialSentimentScreenViewState(val isLoading: Boolean = false, v
 sealed class StockSocialSentimentOneShotEvent{
     data class StockSocialSentimentReceived(val socialSentiment : SocialSentiment): StockSocialSentimentOneShotEvent()
     object ShowToastMessage: StockSocialSentimentOneShotEvent()
+    object AcquireSymbol: StockSocialSentimentOneShotEvent()
 }
 
 sealed class StockSocialSentimentUiAction{

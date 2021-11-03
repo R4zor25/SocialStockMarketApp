@@ -26,9 +26,13 @@ class GeneralStockInformationScreenViewModel @Inject constructor(): ViewModel() 
 
     val apiClient = DefaultApi()
 
+    var stockSymbol : String = ""
+
 
     init {
-        onAction(GeneralStockInformationUiAction.OnInit())
+        coroutineScope.launch {
+            _oneShotEvents.send(GeneralStockInformationOneShotEvent.AcquireSymbol)
+        }
     }
 
     fun onAction(generalStockInformationUiAction: GeneralStockInformationUiAction){
@@ -37,8 +41,8 @@ class GeneralStockInformationScreenViewModel @Inject constructor(): ViewModel() 
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    //TODO API hívás és one shot event
-                    //_oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
+                    val basicFinancials = apiClient.companyBasicFinancials(stockSymbol, "all")
+                    _oneShotEvents.send(GeneralStockInformationOneShotEvent.BasicFinancialsDataReceived(basicFinancials = basicFinancials))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }

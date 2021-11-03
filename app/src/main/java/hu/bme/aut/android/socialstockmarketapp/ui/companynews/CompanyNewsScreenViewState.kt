@@ -7,9 +7,10 @@ data class CompanyNewsScreenViewState(val isLoading: Boolean = false, var errorT
 sealed class CompanyNewsOneShotEvent{
     data class CompanyNewsReceived(val companyNews : List<CompanyNews>): CompanyNewsOneShotEvent()
     object ShowToastMessage: CompanyNewsOneShotEvent()
+    object AcquireSymbol: CompanyNewsOneShotEvent()
 }
 
 sealed class CompanyNewsUiAction{
     class OnInit(): CompanyNewsUiAction()
-    class SpinnerSelected(val spinnerName: String): CompanyNewsUiAction()
+    class DateModified(val date1: String, val date2: String): CompanyNewsUiAction()
 }
