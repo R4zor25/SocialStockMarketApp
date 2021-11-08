@@ -28,17 +28,18 @@ fun FriendList(
     items: ArrayList<String>,
     stickyHeaderText: String,
     isPending: Boolean,
+    alreadyFriend: Boolean,
     onAcceptPending: (String) -> Unit,
     onRefusePending: (String) -> Unit,
     onDeleteFriend: (String) -> Unit,
-
+    openFollowedStocks: (String) -> Unit,
 ) {
     LazyColumn {
         stickyHeader {
             Text(text = stickyHeaderText, color = Color.Black)
         }
         items(items) { item ->
-            FriendListRowItem(userName = item, isPending, onAcceptPending, onRefusePending, onDeleteFriend)
+            FriendListRowItem(userName = item, isPending, alreadyFriend, onAcceptPending, onRefusePending, onDeleteFriend, openFollowedStocks)
             Spacer(modifier = Modifier.padding(top = 8.dp))
         }
     }
@@ -47,16 +48,18 @@ fun FriendList(
 @Composable
 @Preview
 fun FriendListPreview() {
-    FriendList(arrayListOf<String>("Friend1", "Friend2", "Friend3", "Friend4"), "Header", false, {}, {}, {})
+    FriendList(arrayListOf<String>("Friend1", "Friend2", "Friend3", "Friend4"), "Header", false, true, {}, {}, {}, {})
 }
 
 @Composable
 fun FriendListRowItem(
     userName: String,
     isPending: Boolean,
+    alreadyFriend: Boolean,
     onAcceptPending: (String) -> Unit,
     onRefusePending: (String) -> Unit,
-    onDeleteFriend: (String) -> Unit
+    onDeleteFriend: (String) -> Unit,
+    openFollowedStocks: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -89,7 +92,22 @@ fun FriendListRowItem(
                     Text(text = "Decline", color = Color.Black)
                 })
         } else {
-            Spacer(modifier = Modifier.padding(start = 200.dp))
+            if(alreadyFriend){
+                Column(horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(end = 12.dp, start = 20.dp)) {
+                    Button(modifier = Modifier
+                        .height(40.dp),
+                        shape = RoundedCornerShape(40.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Blue
+                        ),
+                        onClick = { openFollowedStocks(userName) }, content = {
+                            Text(text = "Followed Stocks", color = Color.Black)
+                        })
+                }
+            }
+            Column(horizontalAlignment = Alignment.End,
+                modifier = Modifier.fillMaxWidth().padding(end = 12.dp)) {
                 Button(modifier = Modifier
                     .height(40.dp),
                     shape = RoundedCornerShape(40.dp),
@@ -99,6 +117,7 @@ fun FriendListRowItem(
                     onClick = { onDeleteFriend(userName) }, content = {
                         Text(text = "Delete", color = Color.Black)
                     })
+            }
         }
     }
 }

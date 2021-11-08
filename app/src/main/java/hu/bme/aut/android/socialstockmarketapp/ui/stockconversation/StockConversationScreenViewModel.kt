@@ -2,8 +2,10 @@ package hu.bme.aut.android.socialstockmarketapp.ui.stockconversation
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import hu.bme.aut.android.socialstockmarketapp.domain.AuthInteractor
+import hu.bme.aut.android.socialstockmarketapp.domain.ConversationInteractor
+import hu.bme.aut.android.socialstockmarketapp.domain.model.ConversationComment
 import io.finnhub.api.apis.DefaultApi
-import io.finnhub.api.infrastructure.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
@@ -14,7 +16,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class StockConversationScreenViewModel @Inject constructor(): ViewModel() {
+class StockConversationScreenViewModel @Inject constructor(
+    private val conversationInteractor: ConversationInteractor,
+    private val authInteractor: AuthInteractor
+): ViewModel() {
 
     private val coroutineScope = MainScope()
 
@@ -26,9 +31,13 @@ class StockConversationScreenViewModel @Inject constructor(): ViewModel() {
 
     val apiClient = DefaultApi()
 
+    var companySymbol: String = ""
+
 
     init {
-        onAction(StockConversationUiAction.OnInit())
+        coroutineScope.launch {
+            _oneShotEvents.send(StockConversationOneShotEvent.AcquireSymbol)
+        }
     }
 
     fun onAction(stockConversationUiAction: StockConversationUiAction){
@@ -36,9 +45,23 @@ class StockConversationScreenViewModel @Inject constructor(): ViewModel() {
             is StockConversationUiAction.OnInit ->{
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
-                    ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    //TODO API hívás és one shot event
-                    //_oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
+                    val conversationComments = conversationInteractor.getConversationForStock(companySymbol)
+                    _oneShotEvents.send(StockConversationOneShotEvent.CommentsReceived(conversationComments))
+                    _viewState.value = _viewState.value.copy(isLoading = false)
+                }
+            }
+            is StockConversationUiAction.SendMessage -> {
+                coroutineScope.launch(Dispatchers.IO) {
+                    _viewState.value = _viewState.value.copy(isLoading = true)
+                    conversationInteractor.sendConversationComment(
+                        ConversationComment(
+                            authInteractor.getCurrentUserName().toString(),
+                            stockConversationUiAction.message,
+                            "2000-02-02",
+                        ),
+                        companySymbol)
+                    val conversationComments = conversationInteractor.getConversationForStock(companySymbol)
+                    _oneShotEvents.send(StockConversationOneShotEvent.CommentsReceived(conversationComments))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }

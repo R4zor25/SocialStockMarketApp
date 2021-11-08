@@ -6,13 +6,17 @@ import javax.inject.Inject
 
 class AuthInteractor @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource
-){
+) {
     suspend fun createUser(email: String, userName: String, password: String): String = withIOContext {
         firebaseDataSource.createUser(email, userName, password)
     }
 
-    suspend fun login(email: String, password: String):String = withIOContext {
+    suspend fun login(email: String, password: String): String = withIOContext {
         firebaseDataSource.login(email, password)
+    }
+
+    fun getCurrentUserName(): String?{
+        return firebaseDataSource.getCurrentUserName()
     }
 
     fun getEmail(): String {

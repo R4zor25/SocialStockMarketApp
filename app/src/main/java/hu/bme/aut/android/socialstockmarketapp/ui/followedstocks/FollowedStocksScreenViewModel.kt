@@ -2,6 +2,8 @@ package hu.bme.aut.android.socialstockmarketapp.ui.followedstocks
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import hu.bme.aut.android.socialstockmarketapp.domain.FriendInteractor
+import hu.bme.aut.android.socialstockmarketapp.domain.StockInteractor
 import io.finnhub.api.apis.DefaultApi
 import io.finnhub.api.infrastructure.ApiClient
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FollowedStocksScreenViewModel @Inject constructor(): ViewModel() {
+class FollowedStocksScreenViewModel @Inject constructor(private val stockInteractor: StockInteractor, private val friendInteractor: FriendInteractor): ViewModel() {
 
     private val coroutineScope = MainScope()
 
@@ -26,9 +28,15 @@ class FollowedStocksScreenViewModel @Inject constructor(): ViewModel() {
 
     val apiClient = DefaultApi()
 
+    var stockSymbolList = listOf<String>()
+
+    var userName = ""
+
 
     init {
-        onAction(FollowedStocksUiAction.OnInit())
+        coroutineScope.launch {
+            _oneShotEvents.send(FollowedStocksOneShotEvent.AcquireUserName)
+        }
     }
 
     fun onAction(followedStocksUiAction: FollowedStocksUiAction){
@@ -37,8 +45,10 @@ class FollowedStocksScreenViewModel @Inject constructor(): ViewModel() {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    //TODO API hívás és one shot event
-                    //_oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
+                    if(userName == " ")
+                        userName = friendInteractor.getCurrentUser()!!
+                    stockSymbolList =  stockInteractor.getStocksForUser(userName)
+                    _oneShotEvents.send(FollowedStocksOneShotEvent.FollowedStocksReceived(stockSymbolList))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.DropdownMenu
@@ -18,9 +19,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
@@ -41,7 +44,7 @@ fun SpinnerView(dropDownList: MutableList<String>, onSpinnerItemSelected : (Stri
 
     Column(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth().background(MyBlue),
         horizontalAlignment = Alignment.Start
     ) {
         Column {
@@ -69,6 +72,7 @@ fun SpinnerView(dropDownList: MutableList<String>, onSpinnerItemSelected : (Stri
                             Text(
                                 text = sampleName,
                                 fontSize = 20.sp,
+                                color = Color.Black,
                                 modifier = Modifier
                                     .padding(end = 8.dp, start = 8.dp)
                                     .height(30.dp)

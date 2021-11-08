@@ -1,7 +1,6 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.stocklist
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -60,6 +59,7 @@ fun StockListScreen(navController: NavController) {
             }
         ))
     }
+    var editTextValue by rememberSaveable { mutableStateOf("") }
 
 
     LaunchedEffect("key") {
@@ -86,7 +86,7 @@ fun StockListScreen(navController: NavController) {
             .collect()
     }
             Scaffold(
-                modifier = Modifier.background(Color.White),
+                modifier = Modifier,
                 scaffoldState = scaffoldState,
                 topBar = { TopBar("Stock List", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
                 drawerBackgroundColor = Color.White,
@@ -111,14 +111,13 @@ fun StockListScreen(navController: NavController) {
                                     ValueAutoCompleteItem(item.value)
                                 }
                             ) {
-                                var value by remember { mutableStateOf("") }
                                 val view = LocalView.current
 
                                 onItemSelected { item ->
-                                    value = item.value
-                                    filter(value)
+                                    editTextValue = item.value
+                                    filter(editTextValue)
                                     stockList = stockListScreenViewModel.stockSymbolList.filter {
-                                        it.description?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                        it.description?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                     }
                                     view.clearFocus()
                                 }
@@ -127,16 +126,16 @@ fun StockListScreen(navController: NavController) {
                                     modifier = Modifier
                                         .testTag(AutoCompleteSearchBarTag)
                                         .padding(start = 12.dp),
-                                    value = value,
+                                    value = editTextValue,
                                     label = "Search in Stock Titles",
                                     onDoneActionClick = {
                                         view.clearFocus()
                                     },
                                     onClearClick = {
-                                        value = ""
-                                        filter(value)
+                                        editTextValue = ""
+                                        filter(editTextValue)
                                         stockList = stockListScreenViewModel.stockSymbolList.filter {
-                                            it.description?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                            it.description?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                         }
                                         view.clearFocus()
                                     },
@@ -144,10 +143,10 @@ fun StockListScreen(navController: NavController) {
                                         isSearching = focusState.isFocused
                                     },
                                     onValueChanged = { query ->
-                                        value = query
-                                        filter(value)
+                                        editTextValue = query
+                                        filter(editTextValue)
                                         stockList = stockListScreenViewModel.stockSymbolList.filter {
-                                            it.description?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                            it.description?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                         }
                                     }
                                 )

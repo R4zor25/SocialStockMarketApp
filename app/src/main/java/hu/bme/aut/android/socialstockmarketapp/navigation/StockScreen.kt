@@ -19,8 +19,8 @@ sealed class StockScreen (val route: String){
     object StockSocialSentimentScreen: StockScreen("stocksocialsentiment_screen/{companySymbol}")
     object StockConversationScreen: StockScreen("stockconversation_screen/{companySymbol}")
     object StockGraphScreen: StockScreen("stockgraph_screen/{companySymbol}")
-    object GeneralStockInformationScreen: StockScreen("generalstockinformation_screen/{companySymbol}")
-    object FollowedStocksScreen: StockScreen("followedstocks_screen")
+    object FollowedStocksScreen: StockScreen("followedstocks_screen/{userName}")
+    object StockAdviceScreen: StockScreen("stockadvice_screen/{companySymbol}")
 }
 
 data class BottomNavItem(
@@ -50,6 +50,7 @@ object BottomNavItems {
 }
 
 object NavigationDrawerItems {
+    val empty= " "
     val NavigationDrawerItems = listOf(
         BottomNavItem(
             label = "Friends",
@@ -57,9 +58,14 @@ object NavigationDrawerItems {
             route = StockScreen.FriendListScreen.route
         ),
         BottomNavItem(
+            label = "Followed Stocks",
+            icon = Icons.Filled.Money,
+            route = "followedstocks_screen/$empty"
+        ),
+        BottomNavItem(
             label = "Log out",
             icon = Icons.Filled.Logout,
             route = StockScreen.LoginScreen.route
-        )
+        ),
     )
 }

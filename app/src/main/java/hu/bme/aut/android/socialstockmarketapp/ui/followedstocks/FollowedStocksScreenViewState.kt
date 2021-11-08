@@ -1,12 +1,12 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.followedstocks
 
-import io.finnhub.api.models.SocialSentiment
-
 data class FollowedStocksScreenViewState(val isLoading: Boolean = false, var errorText: String?)
 
 sealed class FollowedStocksOneShotEvent{
-    data class FollowedStocksReceived(val socialSentiment : SocialSentiment): FollowedStocksOneShotEvent()
+    data class FollowedStocksReceived(val stockSymbolList : List<String>): FollowedStocksOneShotEvent()
     object ShowToastMessage: FollowedStocksOneShotEvent()
+    object AcquireUserName: FollowedStocksOneShotEvent()
+
 }
 
 sealed class FollowedStocksUiAction{

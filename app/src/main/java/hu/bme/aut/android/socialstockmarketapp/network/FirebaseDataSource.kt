@@ -5,6 +5,8 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import hu.bme.aut.android.socialstockmarketapp.domain.model.Conversation
+import hu.bme.aut.android.socialstockmarketapp.domain.model.ConversationComment
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -63,7 +65,8 @@ class FirebaseDataSource @Inject constructor() {
         val data = hashMapOf(
             "username" to userName,
             "friends" to emptyList<String>(),
-            "email" to email
+            "email" to email,
+            "stocks" to emptyList<String>()
         )
         db.collection("Users").add(data)
     }
@@ -233,4 +236,76 @@ class FirebaseDataSource @Inject constructor() {
         if(userDoc.isEmpty) return false
         return true
     }
-}
+
+    suspend fun followStock(userName: String, stockSymbol: String) {
+        val userDoc = db.collection("Users")
+            .whereEqualTo("username", userName)
+            .get()
+            .await()
+            .documents[0]
+
+        val stocks = userDoc["stocks"] as MutableList<String>
+        stocks.add(stockSymbol)
+
+        db.collection("Users")
+            .document(userDoc.id).update("stocks", stocks.toList())
+            .await()
+    }
+
+    suspend fun unfollowStock(userName: String, stockSymbol: String) {
+        val userDoc = db.collection("Users")
+            .whereEqualTo("username", userName)
+            .get()
+            .await()
+            .documents[0]
+
+        val stocks = userDoc["stocks"] as MutableList<String>
+        stocks.remove(stockSymbol)
+
+        db.collection("Users")
+            .document(userDoc.id).update("stocks", stocks.toList())
+            .await()
+    }
+
+    suspend fun getStocksForUser(userName: String): List<String> {
+        val query = db.collection("Users")
+            .whereEqualTo("username", userName).get().await()
+
+        return query.documents[0]?.get("stocks") as List<String>
+    }
+
+    suspend fun getConversationForStock(stockSymbol: String): MutableList<ConversationComment>{
+        val query = db.collection("Conversations")
+            .whereEqualTo("stockSymbol", stockSymbol).get().await()
+        val conversationCommentList: MutableList<ConversationComment> = mutableListOf<ConversationComment>()
+        for(doc in query){
+            val conversation =  doc.toObject(Conversation::class.java)
+            for(comment in conversation.Comments)
+                conversationCommentList.add(
+                    ConversationComment(
+                    userName = comment["userName"].toString(),
+                        date = comment["date"].toString(),
+                        message = comment["message"].toString()
+                ))
+        }
+        return conversationCommentList
+        }
+
+    suspend fun sendConversationComment(conversationComment: ConversationComment, stockSymbol: String ){
+        val data = hashMapOf(
+            "userName" to conversationComment.userName,
+            "message" to conversationComment.message,
+            "date" to conversationComment.date
+        )
+        val userDoc = db.collection("Conversations")
+            .whereEqualTo("stockSymbol", stockSymbol)
+            .get()
+            .await()
+            .documents[0]
+        val comments = userDoc["Comments"] as MutableList<HashMap<String, String>>
+        comments.add(data)
+        db.collection("Conversations")
+            .document(userDoc.id).update("Comments", comments).await()
+
+    }
+    }

@@ -2,7 +2,10 @@ package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,7 +27,6 @@ fun StockDetailRowItem(title: String, onRowItemClick: () -> Unit) {
         .fillMaxWidth()
         .height(50.dp)
         .background(MyBlue)
-        .padding(bottom = 4.dp)
         .clickable { onRowItemClick() }) {
         Row(modifier = Modifier
             .fillMaxWidth()

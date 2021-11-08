@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,9 +61,9 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
     val viewState = viewModel.viewState.collectAsState()
     val context = LocalContext.current
     var showCustomDialogWithResult by remember { mutableStateOf(false) }
-    var friends by remember { mutableStateOf(arrayListOf<String>()) }
-    var pendingRequests by remember { mutableStateOf(arrayListOf<String>()) }
-    var outgoingRequests by remember { mutableStateOf(arrayListOf<String>()) }
+    var friends by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
+    var pendingRequests by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
+    var outgoingRequests by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
 
     LaunchedEffect("key") {
         viewModel.oneShotEvent
@@ -76,8 +77,7 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
                     FriendListOneShotEvent.ShowToastMessage -> {
                         Toast.makeText(context, viewState.value.infoMessage, Toast.LENGTH_LONG).show()
                     }
-                    else -> {
-                    }
+                    else -> { }
                 }
             }
             .collect()
@@ -113,9 +113,11 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
                     items = friends,
                     stickyHeaderText = "Friends",
                     isPending = false,
+                    alreadyFriend = true,
                     onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
                     onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
-                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) }
+                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) },
+                    openFollowedStocks = { navController.navigate("followedstocks_screen/$it") }
                 )
             }
             if (viewState.value.isLoading)
@@ -125,9 +127,11 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
                 FriendList(items = pendingRequests,
                     stickyHeaderText = "Pending friend requests",
                     isPending = true,
+                    alreadyFriend = false,
                     onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
                     onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
-                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) })
+                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) },
+                    openFollowedStocks = { navController.navigate("followedstocks_screen/$it") })
             }
             if (viewState.value.isLoading)
                 CircularIndeterminateProgressBar(isDisplayed = true)
@@ -136,9 +140,11 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
                 FriendList(items = outgoingRequests,
                     stickyHeaderText = "Outgoing friend requests",
                     isPending = false,
+                    alreadyFriend = false,
                     onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
                     onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
-                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.DeleteOutgoingRequest(it)) })
+                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.DeleteOutgoingRequest(it)) },
+                    openFollowedStocks = { navController.navigate("followedstocks_screen/$it") })
             }
         }
     }

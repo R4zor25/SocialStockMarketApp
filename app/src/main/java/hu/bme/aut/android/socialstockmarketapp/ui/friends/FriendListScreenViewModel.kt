@@ -91,7 +91,7 @@ class FriendListScreenViewModel @Inject constructor(
                 coroutineScope.launch {
                     _viewState.value =  _viewState.value.copy(isLoading = true)
                     friendInteractor.removeFriend(userName = friendListUiAction.userName)
-                    pendingFriendList = friendInteractor.getPendingFriendsForCurrentUser() as ArrayList<String>
+                    friendList = friendInteractor.getFriendsForCurrentUser() as ArrayList<String>
                     _oneShotEvents.send(FriendListOneShotEvent.DataReceived)
                     _viewState.value =  _viewState.value.copy(isLoading = false)
                 }

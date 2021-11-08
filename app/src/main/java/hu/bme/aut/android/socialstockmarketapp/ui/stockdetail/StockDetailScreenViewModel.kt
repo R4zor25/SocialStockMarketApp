@@ -2,6 +2,8 @@ package hu.bme.aut.android.socialstockmarketapp.ui.stockdetail
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import hu.bme.aut.android.socialstockmarketapp.domain.FriendInteractor
+import hu.bme.aut.android.socialstockmarketapp.domain.StockInteractor
 import io.finnhub.api.apis.DefaultApi
 import io.finnhub.api.infrastructure.ApiClient
 import io.finnhub.api.models.CompanyProfile2
@@ -16,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
+class StockDetailScreenViewModel @Inject constructor(private val stockInteractor: StockInteractor, private val friendInteractor: FriendInteractor): ViewModel() {
 
     private val coroutineScope = MainScope()
 
@@ -82,15 +84,35 @@ class StockDetailScreenViewModel @Inject constructor(): ViewModel() {
                     if(companyProfile!!.currency == null && companyProfile!!.name == null && companyProfile!!.exchange == null ) {
                         _viewState.value = _viewState.value.copy(isLoading = false)
                     } else {
+                        val stocks = stockInteractor.getStocksForUser(friendInteractor.getCurrentUser()!!)
+                        var contains = false
+                        for(stock in stocks){
+                            if(stock == symbol)
+                                contains = true
+                        }
                         var quote: Quote = Quote()
                         quote = apiClient.quote(symbol)
                         _oneShotEvents.send(StockDetailOneShotEvent.QuoteInfoReceived(quote))
-                        _oneShotEvents.send(StockDetailOneShotEvent.CompanyInfoReceived(companyProfile!!))
+                        _oneShotEvents.send(StockDetailOneShotEvent.CompanyInfoReceived(companyProfile!!, contains))
                         _viewState.value = _viewState.value.copy(isLoading = false)
                         _viewState.value = _viewState.value.copy(isDataAvailable = true)
                     }
                 }
             }
         }
+    }
+
+    fun followStock(): Boolean{
+        coroutineScope.launch(Dispatchers.IO) {
+            stockInteractor.followStock(friendInteractor.getCurrentUser()!!, symbol)
+        }
+        return true
+    }
+
+    fun unfollowStock(): Boolean{
+        coroutineScope.launch(Dispatchers.IO) {
+            stockInteractor.unfollowStock(friendInteractor.getCurrentUser()!!, symbol)
+        }
+        return true
     }
 }

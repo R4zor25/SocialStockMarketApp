@@ -1,8 +1,8 @@
 package hu.bme.aut.android.socialstockmarketapp.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -18,8 +18,8 @@ import hu.bme.aut.android.socialstockmarketapp.ui.cryptodetails.CryptoDetailScre
 import hu.bme.aut.android.socialstockmarketapp.ui.cryptostocklist.CryptoStockListScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.followedstocks.FollowedStocksScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.friends.FriendListScreen
-import hu.bme.aut.android.socialstockmarketapp.ui.generalstockinformation.GeneralStockInformationScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.mystocklist.MyStockListScreen
+import hu.bme.aut.android.socialstockmarketapp.ui.stockadvice.StockAdviceScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockconversation.StockConversationScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockdetail.StockDetailScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockgraph.StockGraphScreen
@@ -33,7 +33,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 
 @InternalCoroutinesApi
 @AndroidEntryPoint
-class LoginActivity : ComponentActivity() {
+class LoginActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +97,7 @@ class LoginActivity : ComponentActivity() {
                             route = StockScreen.CryptoDetailScreen.route
                         ){ backStackEntry ->
                             val cryptoSymbol = backStackEntry.arguments?.getString("cryptoSymbol")
-                            CryptoDetailScreen(navController, cryptoSymbol)
+                            CryptoDetailScreen(navController, cryptoSymbol!!)
                         }
                         composable(
                             route = StockScreen.CompanyNewsScreen.route
@@ -124,15 +124,16 @@ class LoginActivity : ComponentActivity() {
                             StockGraphScreen(navController, companySymbol!!)
                         }
                         composable(
-                            route = StockScreen.GeneralStockInformationScreen.route
+                            route = StockScreen.StockAdviceScreen.route
                         ){ backStackEntry ->
                             val companySymbol = backStackEntry.arguments?.getString("companySymbol")
-                            GeneralStockInformationScreen(navController, companySymbol!!)
+                            StockAdviceScreen(navController, companySymbol!!)
                         }
                         composable(
                             route = StockScreen.FollowedStocksScreen.route
-                        ) {
-                            FollowedStocksScreen(navController)
+                        ) { backStackEntry ->
+                            val userName = backStackEntry.arguments?.getString("userName")
+                            FollowedStocksScreen(navController, userName!!)
                         }
                     }
                 }

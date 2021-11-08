@@ -26,9 +26,13 @@ class StockAdviceScreenViewModel @Inject constructor(): ViewModel() {
 
     val apiClient = DefaultApi()
 
+    var stockSymbol: String = ""
+
 
     init {
-        onAction(StockAdviceUiAction.OnInit())
+        coroutineScope.launch {
+            _oneShotEvents.send(StockAdviceOneShotEvent.AcquireStockSymbol)
+        }
     }
 
     fun onAction(stockAdviceUiAction: StockAdviceUiAction){
@@ -37,8 +41,8 @@ class StockAdviceScreenViewModel @Inject constructor(): ViewModel() {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    //TODO API hívás és one shot event
-                    //_oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
+                    val recommendationTrend = apiClient.recommendationTrends(stockSymbol)
+                    _oneShotEvents.send(StockAdviceOneShotEvent.RecommendationTrendReceived(recommendationTrendList = recommendationTrend))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }

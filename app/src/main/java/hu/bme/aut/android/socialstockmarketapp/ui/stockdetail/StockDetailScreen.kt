@@ -18,7 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +48,7 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
     val viewState = stockDetailViewModel.viewState.collectAsState()
     var companyProfile by rememberSaveable { mutableStateOf(CompanyProfile2()) }
     var quote by rememberSaveable { mutableStateOf(Quote()) }
-    val uriHandler = LocalUriHandler.current
+    var buttonText by rememberSaveable { mutableStateOf("Follow stock")}
 
     LaunchedEffect("key") {
         stockDetailViewModel.oneShotEvent
@@ -61,7 +60,8 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                     }
                     is StockDetailOneShotEvent.CompanyInfoReceived -> {
                         companyProfile = it.companyProfile2
-
+                        if(it.contains)
+                            buttonText = "Unfollow stock"
                     }
                     is StockDetailOneShotEvent.QuoteInfoReceived -> {
                         quote = it.quote
@@ -72,13 +72,12 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                 }
             }
             .collect()
-
     }
+
     Scaffold(
         modifier = Modifier.background(Color.White),
         topBar = { TopBar("Stock Details", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
         content = {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -215,18 +214,27 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                                 .padding(top = 8.dp)) {
                             Surface(shape = RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp), color = MyBlue) {
                                 Text(
-                                    "IDK", fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                                    "Other Options", fontSize = 19.sp, fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                                 )
                             }
                         }
                         
                         StockDetailRowItem(title = "Company related news") { navController.navigate("companynews_screen/$stockSymbol")}
-                        StockDetailRowItem(title = "More general stock informations") {}
                         StockDetailRowItem(title = "Company's social sentiment") {navController.navigate("stocksocialsentiment_screen/$stockSymbol")}
-                        StockDetailRowItem(title = "Stock graph") {}
-                        StockDetailRowItem(title = "Stock advice") {}
-                        StockDetailRowItem(title = "Conversation about stock") {}
+                        StockDetailRowItem(title = "Stock graph") {navController.navigate("stockgraph_screen/$stockSymbol")}
+                        StockDetailRowItem(title = "Stock advice") { navController.navigate("stockadvice_screen/$stockSymbol") }
+                        StockDetailRowItem(title = "Conversation about stock") {navController.navigate("stockconversation_screen/$stockSymbol")}
+                        StockDetailRowItem(title = buttonText) {
+                            if(buttonText == "Follow stock") {
+                                if(stockDetailViewModel.followStock())
+                                    buttonText = "Unfollow stock"
+                            }
+                            else {
+                                if(stockDetailViewModel.unfollowStock())
+                                    buttonText = "Follow stock"
+                            }
+                        }
 
                     }
                 } else {
