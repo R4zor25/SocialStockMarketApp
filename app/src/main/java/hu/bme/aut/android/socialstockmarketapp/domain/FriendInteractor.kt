@@ -3,7 +3,7 @@ package hu.bme.aut.android.socialstockmarketapp.domain
 import hu.bme.aut.android.socialstockmarketapp.network.FirebaseDataSource
 import javax.inject.Inject
 
-class FriendInteractor@Inject constructor(
+class FriendInteractor @Inject constructor(
     private val firebaseDataSource: FirebaseDataSource
 ) {
     suspend fun getFriendsForCurrentUser(): List<String> {

@@ -1,10 +1,10 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.auth.registration
 
-data class RegistrationScreenViewState(val isLoading: Boolean = false, var errorText: String?)
+data class RegistrationScreenViewState(val isLoading: Boolean = false)
 
 sealed class RegistrationOneShotEvent{
     object NavigateToStockList: RegistrationOneShotEvent()
-    object ShowToastMessage: RegistrationOneShotEvent()
+    data class ShowToastMessage(val errorText: String): RegistrationOneShotEvent()
 }
 
 sealed class RegistrationUiAction{

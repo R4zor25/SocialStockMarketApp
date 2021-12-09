@@ -28,7 +28,7 @@ fun StockNewsDetailScreen(navController: NavHostController, newsUrl: String) {
 
     Box(
         modifier = Modifier.fillMaxSize(),
-    ){
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -40,7 +40,7 @@ fun StockNewsDetailScreen(navController: NavHostController, newsUrl: String) {
 
             ) {
 
-                if (visibility.value){
+                if (visibility.value) {
                     CircularProgressIndicator(
                         color = Color(0xFFE30022)
                     )
@@ -63,30 +63,33 @@ fun StockNewsDetailScreen(navController: NavHostController, newsUrl: String) {
                         )
                         settings.javaScriptEnabled = true
 
-                        webViewClient = object: WebViewClient(){
+                        webViewClient = object : WebViewClient() {
                             override fun onPageStarted(
                                 view: WebView, url: String,
-                                favicon: Bitmap?) {
+                                favicon: Bitmap?
+                            ) {
                                 visibility.value = true
                             }
 
                             override fun onPageFinished(
-                                view: WebView, url: String) {
+                                view: WebView, url: String
+                            ) {
                                 visibility.value = false
                             }
                         }
 
                         // Set web view chrome client
-                        webChromeClient = object: WebChromeClient(){
+                        webChromeClient = object : WebChromeClient() {
                             override fun onProgressChanged(
-                                view: WebView, newProgress: Int) {
+                                view: WebView, newProgress: Int
+                            ) {
                                 progress.value = newProgress.toFloat()
                             }
                         }
 
                         loadUrl(url.value)
                     }
-                },update = {
+                }, update = {
                     it.loadUrl(url.value)
                 })
             }

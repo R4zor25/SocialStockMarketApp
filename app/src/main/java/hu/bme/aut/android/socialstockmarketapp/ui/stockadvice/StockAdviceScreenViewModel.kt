@@ -18,7 +18,7 @@ class StockAdviceScreenViewModel @Inject constructor(): ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<StockAdviceScreenViewState> = MutableStateFlow(StockAdviceScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<StockAdviceScreenViewState> = MutableStateFlow(StockAdviceScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<StockAdviceOneShotEvent>(Channel.BUFFERED)

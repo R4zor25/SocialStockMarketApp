@@ -1,10 +1,9 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.stocklist
 
-data class StockListScreenViewState(val isLoading: Boolean = false, var errorText: String?)
+data class StockListScreenViewState(val isLoading: Boolean = false)
 
 sealed class StockListOneShotEvent {
-    object DataListReceived : StockListOneShotEvent()
-    object ShowToastMessage : StockListOneShotEvent()
+    object StockSymbolListReceived : StockListOneShotEvent()
 }
 
 sealed class StockListUiAction {

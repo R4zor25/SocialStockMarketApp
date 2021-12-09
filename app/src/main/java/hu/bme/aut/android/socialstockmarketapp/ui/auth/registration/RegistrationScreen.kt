@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import hu.bme.aut.android.socialstockmarketapp.R
+import hu.bme.aut.android.socialstockmarketapp.navigation.StockScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CustomTextField
@@ -80,7 +82,6 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
     var passwd by rememberSaveable { mutableStateOf("") }
     var userName by rememberSaveable { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
-    val viewState = viewModel.viewState.collectAsState()
     val context = LocalContext.current
 
 
@@ -88,11 +89,10 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
         viewModel.oneShotEvent
             .onEach {
                 when (it) {
-                    RegistrationOneShotEvent.NavigateToStockList -> navController.navigate("stocklist_screen"){
+                    RegistrationOneShotEvent.NavigateToStockList -> navController.navigate(StockScreen.StockListScreen.route) {
                         navController.popBackStack()
                     }
-                    RegistrationOneShotEvent.ShowToastMessage -> Toast.makeText(context, viewState.value.errorText, Toast.LENGTH_LONG).show()
-                    else -> {}
+                    is RegistrationOneShotEvent.ShowToastMessage -> Toast.makeText(context, it.errorText, Toast.LENGTH_LONG).show()
                 }
             }
             .collect()
@@ -111,7 +111,7 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
                     .width(280.dp)
             )
             Spacer(modifier = Modifier.padding(16.dp))
-            Text(text = "Sign Up", fontWeight = FontWeight(700), fontSize = 32.sp, color = Color.Black)
+            Text(text = stringResource(R.string.sign_up), fontWeight = FontWeight(700), fontSize = 32.sp, color = Color.Black)
             Spacer(modifier = Modifier.padding(16.dp))
             CustomTextField(
                 modifier = Modifier
@@ -120,13 +120,13 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
                         shape = RoundedCornerShape(40.dp)
                     )
                     .padding(horizontal = 12.dp, vertical = 0.dp),
-                leadingIcon = { Icon(Icons.Filled.Person, "contentDescription") },
+                leadingIcon = { Icon(Icons.Filled.Person, "") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Text),
                 onTextChange = { userName = it },
                 text = userName,
-                hint = "Username",
+                hint = stringResource(R.string.user_name),
                 passwordVisibility = true,
-                getPasswordVisibility = {true}
+                getPasswordVisibility = { true }
             )
 
             Spacer(modifier = Modifier.padding(8.dp))
@@ -138,13 +138,13 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
                         shape = CircleShape
                     )
                     .padding(horizontal = 12.dp, vertical = 0.dp),
-                leadingIcon = { Icon(Icons.Filled.Email, "contentDescription") },
+                leadingIcon = { Icon(Icons.Filled.Email, "") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Email),
                 onTextChange = { email = it },
                 text = email,
-                hint = "Email",
+                hint = stringResource(R.string.email),
                 passwordVisibility = true,
-                getPasswordVisibility = {true}
+                getPasswordVisibility = { true }
             )
             Spacer(modifier = Modifier.padding(8.dp))
             CustomTextField(
@@ -159,15 +159,15 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
                     IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
-                        Icon(image, "contentDescription")
-                }
+                        Icon(image, "")
+                    }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Text),
                 onTextChange = { passwd = it },
                 text = passwd,
-                hint = "Password",
+                hint = stringResource(R.string.password),
                 passwordVisibility = false,
-                getPasswordVisibility = {passwordVisibility}
+                getPasswordVisibility = { passwordVisibility }
             )
             Spacer(modifier = Modifier.padding(vertical = 12.dp))
             Button(
@@ -180,7 +180,7 @@ fun MainCardRegistration(navController: NavController, viewModel: RegistrationSc
                 ),
                 contentPadding = PaddingValues(4.dp)
             ) {
-                Text(text = "Register", fontSize = 24.sp, color = Color.Black)
+                Text(text = stringResource(R.string.register), fontSize = 24.sp, color = Color.Black)
             }
             Spacer(modifier = Modifier.padding(vertical = 12.dp))
         }

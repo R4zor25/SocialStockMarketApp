@@ -34,39 +34,6 @@ class StockDetailScreenViewModel @Inject constructor(private val stockInteractor
 
     var companyProfile : CompanyProfile2? = null
 
-    /*MILYEN API HÍVÁSOK IDE
-     Céges adatok a tetejére --> CompanyProfile2
-        Name
-        weburl
-        logo
-        currency
-        exchange
-        country
-      Real Time adat a cégről --> Quote --ez mehet erre a screenre még szerintem
-
-    CÉGHÍREK --> CompanyNews
-        Ugynaz maradhat + idő, mivel kell datepicker, emiatt lehet másik screen kéne
-
-    ÁLTALÁNOS cég adatok --> Basic Financials
-        Current Ratio
-        salesPerShare
-        netMargin
-        metricben
-            10 day average trading volume
-            52 week high
-            52week low, and date
-            52 week price return daily
-            beta??
-    Nyereség, veszteség --> Financials as reported, lehet nem kell
-
-    Social Sentiment --> Vélemények az adott cégről --> Külön screen-en jó lesz
-
-    Cég gyertája --> Candles --> Külön Screen --> Diagram hozzá
-    Adott cégnél piaci tendenciák --> Mit érdemes --> Külön Screen Jobb
-    Beszélgetés
-*/
-
-
 
     init {
         coroutineScope.launch {
@@ -76,6 +43,8 @@ class StockDetailScreenViewModel @Inject constructor(private val stockInteractor
 
     fun onAction(stockDetailUiAction: StockDetailUiAction){
         when(stockDetailUiAction){
+            //getting company profile, if not available we show error message
+                //else we request more data about the stock and display it
             is StockDetailUiAction.OnInit ->{
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
@@ -102,17 +71,21 @@ class StockDetailScreenViewModel @Inject constructor(private val stockInteractor
         }
     }
 
-    fun followStock(): Boolean{
-        coroutineScope.launch(Dispatchers.IO) {
-            stockInteractor.followStock(friendInteractor.getCurrentUser()!!, symbol)
+    fun followStock(){
+        coroutineScope.launch {
+            if(stockInteractor.followStock(friendInteractor.getCurrentUser()!!, symbol))
+                _oneShotEvents.send(StockDetailOneShotEvent.FollowSuccessful)
+            else
+                _oneShotEvents.send(StockDetailOneShotEvent.ShowToastMessage("Something went wrong!"))
         }
-        return true
     }
 
-    fun unfollowStock(): Boolean{
-        coroutineScope.launch(Dispatchers.IO) {
-            stockInteractor.unfollowStock(friendInteractor.getCurrentUser()!!, symbol)
+    fun unfollowStock(){
+        coroutineScope.launch {
+            if(stockInteractor.unfollowStock(friendInteractor.getCurrentUser()!!, symbol))
+                _oneShotEvents.send(StockDetailOneShotEvent.UnfollowSuccessful)
+            else
+                _oneShotEvents.send(StockDetailOneShotEvent.ShowToastMessage("Something went wrong!"))
         }
-        return true
     }
 }

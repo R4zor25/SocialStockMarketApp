@@ -26,7 +26,6 @@ import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 @Composable
 fun FriendList(
     items: ArrayList<String>,
-    stickyHeaderText: String,
     isPending: Boolean,
     alreadyFriend: Boolean,
     onAcceptPending: (String) -> Unit,
@@ -35,9 +34,6 @@ fun FriendList(
     openFollowedStocks: (String) -> Unit,
 ) {
     LazyColumn {
-        stickyHeader {
-            Text(text = stickyHeaderText, color = Color.Black)
-        }
         items(items) { item ->
             FriendListRowItem(userName = item, isPending, alreadyFriend, onAcceptPending, onRefusePending, onDeleteFriend, openFollowedStocks)
             Spacer(modifier = Modifier.padding(top = 8.dp))
@@ -48,7 +44,7 @@ fun FriendList(
 @Composable
 @Preview
 fun FriendListPreview() {
-    FriendList(arrayListOf<String>("Friend1", "Friend2", "Friend3", "Friend4"), "Header", false, true, {}, {}, {}, {})
+    FriendList(arrayListOf<String>("Friend1", "Friend2", "Friend3", "Friend4"), false, true, {}, {}, {}, {})
 }
 
 @Composable
@@ -67,8 +63,8 @@ fun FriendListRowItem(
             .fillMaxWidth()
             .height(50.dp), verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.People, contentDescription = "", modifier = Modifier.padding(12.dp, 0.dp))
-        Text(text = userName, fontSize = 18.sp, fontWeight = FontWeight(700))
+        Icon(Icons.Filled.People, contentDescription = "", modifier = Modifier.padding(12.dp, 0.dp), tint = Color.Black)
+        Text(text = userName, fontSize = 18.sp, fontWeight = FontWeight(700), color = Color.Black)
         if (isPending) {
             Spacer(modifier = Modifier.padding(start = 20.dp))
             Button(modifier = Modifier
@@ -99,7 +95,7 @@ fun FriendListRowItem(
                         .height(40.dp),
                         shape = RoundedCornerShape(40.dp),
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color.Blue
+                            backgroundColor = Color.LightGray
                         ),
                         onClick = { openFollowedStocks(userName) }, content = {
                             Text(text = "Followed Stocks", color = Color.Black)

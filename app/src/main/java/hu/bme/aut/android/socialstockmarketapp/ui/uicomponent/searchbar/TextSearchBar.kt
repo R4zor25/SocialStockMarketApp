@@ -1,6 +1,7 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.searchbar
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -10,8 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 
 @Composable
 fun TextSearchBar(
@@ -27,6 +31,7 @@ fun TextSearchBar(
         modifier = modifier
             .fillMaxWidth(.9f)
             .onFocusChanged { onFocusChanged(it) },
+        shape = RoundedCornerShape(30.dp),
         value = value,
         onValueChange = { query ->
             onValueChanged(query)
@@ -39,6 +44,15 @@ fun TextSearchBar(
                 Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
             }
         },
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color.Black,
+            cursorColor = Color.Black,
+            focusedIndicatorColor = MyBlue,
+            unfocusedIndicatorColor = MyBlue,
+            focusedLabelColor = Color.Black,
+            unfocusedLabelColor = Color.Black,
+            trailingIconColor = Color.Black
+        ),
         keyboardActions = KeyboardActions(onDone = { onDoneActionClick(value) }),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Done,

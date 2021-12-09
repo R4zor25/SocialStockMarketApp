@@ -32,7 +32,7 @@ fun NavigationDrawerRowItem(item: BottomNavItem, selected: Boolean, onItemClick:
         Image(
             imageVector = item.icon,
             contentDescription = item.label,
-            colorFilter = ColorFilter.tint(Color.White),
+            colorFilter = ColorFilter.tint(Color.Black),
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .height(60.dp)

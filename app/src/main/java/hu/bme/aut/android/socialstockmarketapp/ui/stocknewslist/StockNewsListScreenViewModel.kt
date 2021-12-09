@@ -16,11 +16,11 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class StockNewsListScreenViewModel @Inject constructor(): ViewModel() {
+class StockNewsListScreenViewModel @Inject constructor() : ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<StockNewsListScreenViewState> = MutableStateFlow(StockNewsListScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<StockNewsListScreenViewState> = MutableStateFlow(StockNewsListScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<StockNewsListOneShotEvent>(Channel.BUFFERED)
@@ -31,15 +31,13 @@ class StockNewsListScreenViewModel @Inject constructor(): ViewModel() {
     var stockNewsList = listOf<MarketNews>()
 
 
-
-
     init {
         onAction(StockNewsListUiAction.OnInit())
     }
 
-    fun onAction(stockNewsListUiAction: StockNewsListUiAction){
-        when(stockNewsListUiAction){
-            is StockNewsListUiAction.OnInit ->{
+    fun onAction(stockNewsListUiAction: StockNewsListUiAction) {
+        when (stockNewsListUiAction) {
+            is StockNewsListUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"

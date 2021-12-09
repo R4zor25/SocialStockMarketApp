@@ -14,6 +14,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,7 +41,10 @@ Surface(modifier = Modifier
     shape = RoundedCornerShape(40.dp)) {
 
     Column() {
-        Text(text = cryptoSymbol.displaySymbol.toString(), fontSize = 16.sp, modifier =  Modifier.padding(horizontal = 8.dp, vertical =  8.dp))
+        Text(text = cryptoSymbol.displaySymbol.toString(),
+            fontSize = 16.sp,
+            modifier =  Modifier.padding(horizontal = 8.dp, vertical =  8.dp),
+            color = Color.Black)
     }
 }
 }

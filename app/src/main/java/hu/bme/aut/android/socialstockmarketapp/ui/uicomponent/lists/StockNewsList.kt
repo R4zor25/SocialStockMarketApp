@@ -22,6 +22,8 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import io.finnhub.api.models.MarketNews
+import java.time.Instant
+import java.time.ZoneId
 
 @Composable
 fun StockNewsList(stockNewsList: List<MarketNews>, onRowItemClick: (String) -> Unit, listState : LazyListState) {
@@ -50,7 +52,10 @@ fun StockNewsRowItem(stockNews: MarketNews, onRowItemClick: (String) -> Unit) {
         ) {
             Column() {
                 Row() {
-                    Text(text = stockNews.headline.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp))
+                    Text(text = stockNews.headline.toString(), fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(start = 6.dp),
+                        color = Color.Black)
                 }
                 Row {
                     Column(
@@ -64,12 +69,23 @@ fun StockNewsRowItem(stockNews: MarketNews, onRowItemClick: (String) -> Unit) {
                             modifier = Modifier.size(100.dp)
                                 .padding(start = 12.dp, top = 12.dp)
                         )
-                        Text(text = "Category: " + stockNews.category.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp, top = 8.dp))
-                        Text(text = "Source: " + stockNews.source.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp))
+                        Text(text = "Category: " + stockNews.category.toString(), fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp, top = 8.dp),
+                            color = Color.Black)
+                        Text(text = "Source: " + stockNews.source.toString(), fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp),
+                            color = Color.Black)
+                        Text(text = Instant.ofEpochSecond(stockNews.datetime!!)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime().toString().replace("T", " "), fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp),
+                            color = Color.Black)
 
                     }
                     Column() {
-                        Text(text = stockNews.summary.toString(), fontSize = 16.sp, modifier = Modifier.padding(top = 12.dp, start = 4.dp))
+                        Text(text = stockNews.summary.toString(), fontSize = 16.sp,
+                            modifier = Modifier.padding(top = 12.dp, start = 4.dp),
+                            color = Color.Black)
                     }
                 }
             }

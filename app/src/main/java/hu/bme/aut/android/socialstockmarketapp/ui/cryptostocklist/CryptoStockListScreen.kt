@@ -9,21 +9,25 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist.ValueAutoCompleteItem
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.BottomNavigationBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.SpinnerView
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteBox
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteSearchBarTag
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.ValueAutoCompleteString
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.asAutoCompleteEntities
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists.CryptoSymbolList
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
@@ -42,18 +46,11 @@ fun CryptoStockListScreen(navController: NavController) {
     val cryptoStockListScreenViewModel = hiltViewModel<CryptoStockListScreenViewModel>()
     val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
-    var cryptoSymbolList by remember { mutableStateOf(listOf<CryptoSymbol>()) }
+    var cryptoSymbolList by rememberSaveable { mutableStateOf(listOf<CryptoSymbol>()) }
     val viewState = cryptoStockListScreenViewModel.viewState.collectAsState()
     val listState = rememberLazyListState()
-    val categoryList by remember {
-        mutableStateOf(
-            mutableListOf(
-                "KRAKEN", "HITBTC", "COINBASE", "GEMINI", "POLONIEX", "Binance", "ZB", "BITTREX",
-                "KUCOIN", "OKEX", "BITFINEX", "HUOBI"
-            )
-        )
-    }
-    val cryptoSymbols by remember { mutableStateOf(mutableListOf<String>()) }
+    val categoryList = stringArrayResource(R.array.crypto_trader_array)
+    val cryptoSymbols by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
     var autoCompleteEntities by remember {
         mutableStateOf(cryptoSymbols.asAutoCompleteEntities(
             filter = { item, query ->
@@ -61,6 +58,7 @@ fun CryptoStockListScreen(navController: NavController) {
             }
         ))
     }
+    var editTextValue by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect("key") {
         cryptoStockListScreenViewModel.oneShotEvent
@@ -89,7 +87,7 @@ fun CryptoStockListScreen(navController: NavController) {
         Scaffold(
             modifier = Modifier.background(Color.White),
             scaffoldState = scaffoldState,
-            topBar = { TopBar("Crypto Currency", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+            topBar = { TopBar(stringResource(R.string.crypto_currency), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
             drawerBackgroundColor = Color.White,
             drawerContent = {
                 NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
@@ -98,12 +96,15 @@ fun CryptoStockListScreen(navController: NavController) {
                 BottomNavigationBar(navController = navController)
             }, content = { _ ->
 
-
-                Column() {
-                    Row(modifier = Modifier.weight(0.065f)) {
+                Column(modifier = Modifier.background(Color.White)) {
+                    Row(modifier = Modifier.weight(0.1f)) {
                         SpinnerView(
-                            dropDownList = categoryList, onSpinnerItemSelected = { cryptoStockListScreenViewModel.onAction(CryptoStockListUiAction.SpinnerSelected(it)) },
-                            spinnerTitle = "Exchange"
+                            dropDownList = categoryList.toMutableList(), onSpinnerItemSelected = {
+                                cryptoStockListScreenViewModel.onAction(CryptoStockListUiAction.SpinnerSelected(it))
+                                editTextValue = ""
+                                                                                                 },
+                            spinnerTitle = stringResource(R.string.exchange),
+                            null
                         )
                     }
                     Row() {
@@ -111,17 +112,16 @@ fun CryptoStockListScreen(navController: NavController) {
                             AutoCompleteBox(
                                 items = autoCompleteEntities,
                                 itemContent = { item ->
-                                    ValueAutoCompleteItem(item.value)
+                                    ValueAutoCompleteString(item.value)
                                 }
                             ) {
-                                var value by remember { mutableStateOf("") }
                                 val view = LocalView.current
 
                                 onItemSelected { item ->
-                                    value = item.value
-                                    filter(value)
+                                    editTextValue = item.value
+                                    filter(editTextValue)
                                     cryptoSymbolList = cryptoStockListScreenViewModel.cryptoSymbolList.filter {
-                                        it.displaySymbol?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                        it.displaySymbol?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                     }
                                     view.clearFocus()
                                 }
@@ -130,27 +130,28 @@ fun CryptoStockListScreen(navController: NavController) {
                                     modifier = Modifier
                                         .testTag(AutoCompleteSearchBarTag)
                                         .padding(start = 12.dp),
-                                    value = value,
-                                    label = "Search in Crypto Exchanges",
+                                    value = editTextValue,
+                                    label = stringResource(R.string.search_in_crypto_exchange),
                                     onDoneActionClick = {
                                         view.clearFocus()
                                     },
                                     onClearClick = {
-                                        value = ""
-                                        filter(value)
+                                        editTextValue = ""
+                                        filter(editTextValue)
                                         cryptoSymbolList = cryptoStockListScreenViewModel.cryptoSymbolList.filter {
-                                            it.displaySymbol?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                            it.displaySymbol?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                         }
                                         view.clearFocus()
                                     },
                                     onFocusChanged = { focusState ->
                                         isSearching = focusState.isFocused
+                                        filter(editTextValue)
                                     },
                                     onValueChanged = { query ->
-                                        value = query
-                                        filter(value)
+                                        editTextValue = query
+                                        filter(editTextValue)
                                         cryptoSymbolList = cryptoStockListScreenViewModel.cryptoSymbolList.filter {
-                                            it.displaySymbol?.lowercase(Locale.getDefault())?.contains(value.lowercase()) ?: false
+                                            it.displaySymbol?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
                                         }
                                     }
                                 )

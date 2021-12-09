@@ -15,11 +15,11 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class CryptoDetailScreenViewModel @Inject constructor(): ViewModel() {
+class CryptoDetailScreenViewModel @Inject constructor() : ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<CryptoDetailScreenViewState> = MutableStateFlow(CryptoDetailScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<CryptoDetailScreenViewState> = MutableStateFlow(CryptoDetailScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<CryptoDetailOneShotEvent>(Channel.BUFFERED)
@@ -27,7 +27,7 @@ class CryptoDetailScreenViewModel @Inject constructor(): ViewModel() {
 
     val apiClient = DefaultApi()
 
-    var cryptoSymbol : String = ""
+    var cryptoSymbol: String = ""
 
 
     init {
@@ -36,9 +36,9 @@ class CryptoDetailScreenViewModel @Inject constructor(): ViewModel() {
         }
     }
 
-    fun onAction(cryptoDetailUiAction: CryptoDetailUiAction){
-        when(cryptoDetailUiAction){
-            is CryptoDetailUiAction.OnInit ->{
+    fun onAction(cryptoDetailUiAction: CryptoDetailUiAction) {
+        when (cryptoDetailUiAction) {
+            is CryptoDetailUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5o81hqad3i92b40uth0"
@@ -46,15 +46,18 @@ class CryptoDetailScreenViewModel @Inject constructor(): ViewModel() {
                     val end = calendar.timeInMillis
                     calendar.add(Calendar.MONTH, -1)
                     val start = calendar.timeInMillis
-                    val candles = apiClient.cryptoCandles(cryptoSymbol, "60", start/1000, end/1000)
-                    _oneShotEvents.send(CryptoDetailOneShotEvent.StockCandlesDataReceived(candles))
+                    val candles = apiClient.cryptoCandles(cryptoSymbol, "60", start / 1000, end / 1000)
+                    if (candles.c != null && candles.o != null && candles.h != null && candles.l != null) {
+                        _viewState.value = _viewState.value.copy(dataAvailable = true)
+                        _oneShotEvents.send(CryptoDetailOneShotEvent.StockCandlesDataReceived(candles))
+                    }
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }
-            is CryptoDetailUiAction.RefreshGraphData ->{
+            is CryptoDetailUiAction.RefreshGraphData -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
-                    val resolution = when(cryptoDetailUiAction.resolution){
+                    val resolution = when (cryptoDetailUiAction.resolution) {
                         "1 Minute" -> "1"
                         "5 Minutes" -> "5"
                         "15 Minutes" -> "15"
@@ -65,10 +68,19 @@ class CryptoDetailScreenViewModel @Inject constructor(): ViewModel() {
                         "Monthly" -> "M"
                         else -> "60"
                     }
-                    val candles = apiClient.cryptoCandles(cryptoSymbol, resolution,
-                        cryptoDetailUiAction.startDateTimeStamp/1000, cryptoDetailUiAction.endDateTimeStamp/1000)
+                    val candles = apiClient.cryptoCandles(
+                        cryptoSymbol, resolution,
+                        cryptoDetailUiAction.startDateTimeStamp / 1000, cryptoDetailUiAction.endDateTimeStamp / 1000
+                    )
                     _oneShotEvents.send(CryptoDetailOneShotEvent.StockCandlesDataReceived(candles))
                     _viewState.value = _viewState.value.copy(isLoading = false)
+                }
+            }
+            is CryptoDetailUiAction.RedrawGraphData -> {
+                coroutineScope.launch(Dispatchers.IO) {
+                    _viewState.value = _viewState.value.copy(redrawNeeded = true)
+                    Thread.sleep(200)
+                    _viewState.value = _viewState.value.copy(redrawNeeded = false)
                 }
             }
         }

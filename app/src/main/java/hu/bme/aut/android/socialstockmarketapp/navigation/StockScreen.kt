@@ -4,12 +4,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
+//All Composble Screen with it's navigation route
 sealed class StockScreen (val route: String){
     object LoginScreen: StockScreen("login_screen")
     object RegistrationScreen: StockScreen("registration_screen")
     object StockListScreen: StockScreen("stocklist_screen")
     object CryptoStockListScreen: StockScreen("cryptostocklist_screen")
-    object MyStockListScreen: StockScreen("mystocklist_screen")
     object FriendListScreen: StockScreen("friendlist_screen")
     object StockNewsListScreen: StockScreen("stocknewslist_screen")
     object StockNewsDetailScreen: StockScreen("stocknewsdetail_screen/{newsUrl}")
@@ -37,8 +37,8 @@ object BottomNavItems {
             route = StockScreen.StockListScreen.route
         ),
         BottomNavItem(
-            label = "CryptoCurrency",
-            icon = Icons.Filled.Search,
+            label = "Crypto Currency",
+            icon = Icons.Filled.Money,
             route = StockScreen.CryptoStockListScreen.route
         ),
         BottomNavItem(
@@ -50,6 +50,7 @@ object BottomNavItems {
 }
 
 object NavigationDrawerItems {
+    // value for distinguishing whose friendlist we need to get
     val empty= " "
     val NavigationDrawerItems = listOf(
         BottomNavItem(

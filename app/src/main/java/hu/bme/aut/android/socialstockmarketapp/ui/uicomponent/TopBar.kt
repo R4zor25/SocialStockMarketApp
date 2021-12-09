@@ -5,8 +5,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
@@ -23,13 +26,13 @@ import kotlinx.coroutines.launch
             )
         },
         navigationIcon = {
-            IconButton(onClick = {  scope.launch { scaffoldState.drawerState.open() }}
+            IconButton(modifier = Modifier.semantics { contentDescription = "TestMenu" }, onClick = {  scope.launch { scaffoldState.drawerState.open() }}
                 ){
                 buttonIcon?.let { Icon(it, contentDescription = "") }
             }
         },
         backgroundColor = MyBlue,
-        contentColor = Color.Black
+        contentColor = Color.Black,
     )
 }
 

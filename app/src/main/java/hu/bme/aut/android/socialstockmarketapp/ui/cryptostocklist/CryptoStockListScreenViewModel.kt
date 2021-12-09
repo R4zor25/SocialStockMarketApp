@@ -16,10 +16,10 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class CryptoStockListScreenViewModel @Inject constructor(): ViewModel() {
+class CryptoStockListScreenViewModel @Inject constructor() : ViewModel() {
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<CryptoStockListScreenViewState> = MutableStateFlow(CryptoStockListScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<CryptoStockListScreenViewState> = MutableStateFlow(CryptoStockListScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<CryptoStockListOneShotEvent>(Channel.BUFFERED)
@@ -30,13 +30,13 @@ class CryptoStockListScreenViewModel @Inject constructor(): ViewModel() {
     var cryptoSymbolList = listOf<CryptoSymbol>()
 
 
-    init{
-        onAction(CryptoStockListUiAction.OnInit())
+    init {
+        onAction(CryptoStockListUiAction.OnInit)
     }
 
-    fun onAction(cryptoStockListUiAction: CryptoStockListUiAction){
-        when(cryptoStockListUiAction){
-            is CryptoStockListUiAction.OnInit ->{
+    fun onAction(cryptoStockListUiAction: CryptoStockListUiAction) {
+        when (cryptoStockListUiAction) {
+            is CryptoStockListUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5o81hqad3i92b40uth0"
@@ -55,4 +55,4 @@ class CryptoStockListScreenViewModel @Inject constructor(): ViewModel() {
             }
         }
     }
-    }
+}

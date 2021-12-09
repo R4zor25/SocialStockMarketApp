@@ -11,6 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,7 @@ fun ConversationCommentList(
 fun ConversationCommentRowItemPreview() {
     ConversationCommentRowItem(
         ConversationComment("Minta User",
-        "EZ asdajrhgaioluserhfushmrg  ghiujterghn iousvbutir bjnoiurtb juirtjb oriutejb"
+        "Minta üzenet"
         , "2021-01-01 15:22")
     )
 }
@@ -50,10 +51,8 @@ fun ConversationCommentRowItem(
         .background(MyBlue, shape = RoundedCornerShape(20.dp))
         .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-
-        ) {
-            Text(text = comment.userName, fontSize = 18.sp,
+        Row() {
+            Text(text = comment.userName, fontSize = 18.sp, color = Color.Black,
                 fontWeight = FontWeight(700), modifier = Modifier.padding(start = 12.dp))
         Column(
             horizontalAlignment = Alignment.End,
@@ -61,12 +60,13 @@ fun ConversationCommentRowItem(
                 .fillMaxWidth()
                 .padding(end = 12.dp)
         ) {
-            Text(text = comment.date, fontSize = 18.sp, fontWeight = FontWeight(700))
+            Text(text = comment.date, fontSize = 18.sp, fontWeight = FontWeight(700), color = Color.Black)
         }
     }
-        Row(){
+        Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.padding(top = 8.dp).fillMaxWidth()){
             Text(text = comment.message, fontSize = 18.sp,
                 fontWeight = FontWeight(700),
+                color = Color.Black,
                 modifier = Modifier.padding(start = 12.dp))
         }
 }

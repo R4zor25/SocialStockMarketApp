@@ -9,7 +9,9 @@ sealed class StockDetailOneShotEvent{
     data class CompanyInfoReceived(val companyProfile2: CompanyProfile2, val contains: Boolean): StockDetailOneShotEvent()
     data class QuoteInfoReceived(val quote: Quote): StockDetailOneShotEvent()
     object AcquireSymbol: StockDetailOneShotEvent()
-    object ShowToastMessage: StockDetailOneShotEvent()
+    data class ShowToastMessage(val toastMessage: String): StockDetailOneShotEvent()
+    object FollowSuccessful : StockDetailOneShotEvent()
+    object UnfollowSuccessful : StockDetailOneShotEvent()
 }
 
 sealed class StockDetailUiAction{

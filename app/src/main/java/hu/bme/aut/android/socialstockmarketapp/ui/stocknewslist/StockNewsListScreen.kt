@@ -2,7 +2,9 @@ package hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -14,16 +16,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.BottomNavigationBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.SpinnerView
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteBox
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteSearchBarTag
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.ValueAutoCompleteString
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.asAutoCompleteEntities
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists.StockNewsList
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
@@ -44,8 +50,8 @@ fun StockNewsListScreen(navController: NavController) {
     var stockNewsList by rememberSaveable { mutableStateOf(listOf<MarketNews>()) }
     val viewState = stockNewsListScreenViewModel.viewState.collectAsState()
     val listState = rememberLazyListState()
-    val categoryList by rememberSaveable { mutableStateOf(mutableListOf("General", "Forex", "Crypto", "Merger")) }
-    val newsHeadlines by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
+    val categoryList = stringArrayResource(R.array.news_type_array)
+    val newsHeadlines by remember { mutableStateOf(mutableListOf<String>()) }
     var editTextValue by rememberSaveable { mutableStateOf("") }
 
 
@@ -84,7 +90,7 @@ fun StockNewsListScreen(navController: NavController) {
         Scaffold(
             modifier = Modifier.background(Color.White),
             scaffoldState = scaffoldState,
-            topBar = { TopBar("Stock Market News", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+            topBar = { TopBar(stringResource(R.string.stock_market_news), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
             drawerBackgroundColor = Color.White,
             drawerContent = {
                 NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
@@ -93,14 +99,15 @@ fun StockNewsListScreen(navController: NavController) {
                 BottomNavigationBar(navController = navController)
             }, content = { _ ->
 
-                Column() {
-                    Row(modifier = Modifier.weight(0.065f)) {
+                Column(modifier = Modifier.background(Color.White)) {
+                    Row(modifier = Modifier.weight(0.1f)) {
                         SpinnerView(
-                            dropDownList = categoryList, onSpinnerItemSelected = {
+                            dropDownList = categoryList.toMutableList(), onSpinnerItemSelected = {
                                 editTextValue = ""
                                 stockNewsListScreenViewModel.onAction(StockNewsListUiAction.SpinnerSelected(it))
                             },
-                            spinnerTitle = "News Category"
+                            spinnerTitle = stringResource(R.string.news_category),
+                            null
                         )
                     }
                     Row() {
@@ -108,7 +115,7 @@ fun StockNewsListScreen(navController: NavController) {
                             AutoCompleteBox(
                                 items = autoCompleteEntities,
                                 itemContent = { item ->
-                                    ValueAutoCompleteItem(item.value)
+                                    ValueAutoCompleteString(item.value)
                                 }
                             ) {
 
@@ -128,7 +135,7 @@ fun StockNewsListScreen(navController: NavController) {
                                         .testTag(AutoCompleteSearchBarTag)
                                         .padding(start = 12.dp),
                                     value = editTextValue,
-                                    label = "Search in Headline",
+                                    label = stringResource(R.string.search_in_headline),
                                     onDoneActionClick = {
                                         view.clearFocus()
                                     },
@@ -141,6 +148,7 @@ fun StockNewsListScreen(navController: NavController) {
                                     },
                                     onFocusChanged = { focusState ->
                                         isSearching = focusState.isFocused
+                                        filter(editTextValue)
 
                                     },
                                     onValueChanged = { query ->
@@ -173,17 +181,6 @@ fun StockNewsListScreen(navController: NavController) {
     }
 }
 
-@Composable
-fun ValueAutoCompleteItem(item: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(text = item, style = MaterialTheme.typography.subtitle2)
-    }
-}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

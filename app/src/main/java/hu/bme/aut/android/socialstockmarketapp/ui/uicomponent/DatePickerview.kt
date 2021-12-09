@@ -1,6 +1,7 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.google.android.material.datepicker.*
+import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import java.util.*
 
 @Composable
@@ -32,6 +34,7 @@ fun DatePickerview(
             .fillMaxSize()
             .wrapContentSize(Alignment.TopStart)
             .padding(top = 10.dp)
+            .background(MyBlue)
             .border(0.5.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.5f))
             .clickable{
                 showDatePicker(activity, updatedDate)
@@ -41,7 +44,7 @@ fun DatePickerview(
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(12.dp)
         ) {
 
             val (lable, iconView) = createRefs()

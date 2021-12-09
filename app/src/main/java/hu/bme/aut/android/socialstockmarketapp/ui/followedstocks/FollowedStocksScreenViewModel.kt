@@ -16,11 +16,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FollowedStocksScreenViewModel @Inject constructor(private val stockInteractor: StockInteractor, private val friendInteractor: FriendInteractor): ViewModel() {
+class FollowedStocksScreenViewModel @Inject constructor(
+    private val stockInteractor: StockInteractor,
+    private val friendInteractor: FriendInteractor
+) : ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<FollowedStocksScreenViewState> = MutableStateFlow(FollowedStocksScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<FollowedStocksScreenViewState> = MutableStateFlow(FollowedStocksScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<FollowedStocksOneShotEvent>(Channel.BUFFERED)
@@ -32,22 +35,22 @@ class FollowedStocksScreenViewModel @Inject constructor(private val stockInterac
 
     var userName = ""
 
-
     init {
         coroutineScope.launch {
             _oneShotEvents.send(FollowedStocksOneShotEvent.AcquireUserName)
         }
     }
 
-    fun onAction(followedStocksUiAction: FollowedStocksUiAction){
-        when(followedStocksUiAction){
-            is FollowedStocksUiAction.OnInit ->{
+    fun onAction(followedStocksUiAction: FollowedStocksUiAction) {
+        when (followedStocksUiAction) {
+            //if username value is one blank space, then we get the list for the current user, else for the given username
+            is FollowedStocksUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    if(userName == " ")
+                    if (userName == " ")
                         userName = friendInteractor.getCurrentUser()!!
-                    stockSymbolList =  stockInteractor.getStocksForUser(userName)
+                    stockSymbolList = stockInteractor.getStocksForUser(userName)
                     _oneShotEvents.send(FollowedStocksOneShotEvent.FollowedStocksReceived(stockSymbolList))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }

@@ -31,7 +31,13 @@ fun NavigationDrawer(navController: NavController, scaffoldState: ScaffoldState,
 
             NavigationDrawerRowItem(item, false) {
                 coroutineScope.launch { scaffoldState.drawerState.close() }
-                navController.navigate(item.route) }
+                navController.navigate(item.route){
+                    if(item.route == "login_screen") {
+                        navController.popBackStack()
+                        popUpTo(navController.currentDestination?.route.toString()) {inclusive = true}
+                        launchSingleTop = true
+                    }
+                } }
 
         }
     }

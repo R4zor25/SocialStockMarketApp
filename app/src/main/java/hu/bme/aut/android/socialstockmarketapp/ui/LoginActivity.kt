@@ -18,7 +18,6 @@ import hu.bme.aut.android.socialstockmarketapp.ui.cryptodetails.CryptoDetailScre
 import hu.bme.aut.android.socialstockmarketapp.ui.cryptostocklist.CryptoStockListScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.followedstocks.FollowedStocksScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.friends.FriendListScreen
-import hu.bme.aut.android.socialstockmarketapp.ui.mystocklist.MyStockListScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockadvice.StockAdviceScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockconversation.StockConversationScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stockdetail.StockDetailScreen
@@ -27,7 +26,6 @@ import hu.bme.aut.android.socialstockmarketapp.ui.stocklist.StockListScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stocknewsdetail.StockNewsDetailScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist.StockNewsListScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.stocksocialsentiment.StockSocialSentimentScreen
-import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
 
@@ -35,11 +33,14 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
+    //OnCreate
+    //Adding NavHosts(Composable Screens) to navController
+    //Handling Extra parameters
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SocialStockMarketAppTheme() {
+            MaterialTheme() {
                 Surface(color = MaterialTheme.colors.background) {
                     val navController = rememberNavController()
                     NavHost(
@@ -65,11 +66,6 @@ class LoginActivity : AppCompatActivity() {
                             route = StockScreen.CryptoStockListScreen.route
                         ) {
                             CryptoStockListScreen(navController)
-                        }
-                        composable(
-                            route = StockScreen.MyStockListScreen.route
-                        ) {
-                            MyStockListScreen(navController)
                         }
                         composable(
                             route = StockScreen.FriendListScreen.route

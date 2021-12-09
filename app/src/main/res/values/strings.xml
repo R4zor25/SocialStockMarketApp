@@ -1,6 +1,92 @@
 <resources>
     <string name="app_name">SocialStockMarketApp</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="user_name">UserName</string>
+    <string name="user_name">Username</string>
+    <string name="sing_in">Sign In</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="registration">Registration</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="register">Register</string>
+    <string name="company_news">Company News</string>
+    <string name="search_in_headline">Search in Headline</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="search_in_stock_title">Search in stock title</string>
+    <string name="crypto_graph">Crypto Graph</string>
+    <string name="exchange_ratio">Exchange Ratio</string>
+    <string name="resolution">Resolution</string>
+    <string name="stock_value">Stock Value</string>
+    <string name="refresh">Refresh</string>
+    <string name="crypto_currency">Crypto Currency</string>
+    <string name="exchange">Exchange</string>
+    <string name="search_in_crypto_exchange">Search in Crypto Exchange</string>
+    <string name="followed_stock_list">Followed Stock List</string>
+    <string name="add_friend">Add Friend</string>
+    <string name="friends">Friends</string>
+    <string name="incoming_friend_requests">Incoming friend requests</string>
+    <string name="pending_friend_requests">Pending friend requests</string>
+    <string name="recommendation_trends">Recommendation Trends</string>
+    <string name="recommendation_trend_is_not_available_for_this_stock">Recommendation trend is not available for this stock!</string>
+    <string name="stock_conversation">Stock Conversation</string>
+    <string name="message">Message</string>
+    <string name="send">Send</string>
+    <string name="stock_details">Stock Details</string>
+    <string name="stock_data_details_is_not_available_for_this_company">Stock data details is not available for this company!</string>
+    <string name="general_company_information">General Company Information</string>
+    <string name="general_stock_information">General Stock Information</string>
+    <string name="other_options">Other Options</string>
+    <string name="company_related_news">Company related news</string>
+    <string name="companys_social_sentiment">Company\'s social sentiment</string>
+    <string name="stock_graph">Stock graph</string>
+    <string name="stock_advice">Stock advice</string>
+    <string name="conversation_about_stock">Conversation about stock</string>
+    <string name="price">Price</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="stock_list">Stock List</string>
+    <string name="extract_location">Exchange Location</string>
+    <string name="stock_market_news">Stock Market News</string>
+    <string name="news_category">News Category</string>
+    <string name="stock_social_sentiment">Stock Social Sentiment</string>
+    <string name="twitter">Twitter</string>
+    <string name="reddit">Reddit</string>
+    <string-array name="resolution_array">
+        <item>1 Minute</item>
+        <item>5 Minutes</item>
+        <item>15 Minutes</item>
+        <item>30 Minutes</item>
+        <item>60 Minutes</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string-array name="price_type_array">
+        <item>Close price</item>
+        <item>High price</item>
+        <item>Low price</item>
+        <item>Open price</item>
+    </string-array>
+    <string-array name="crypto_trader_array">
+        <item>Binance</item>
+        <item>KRAKEN</item>
+        <item>HITBTC</item>
+        <item>COINBASE</item>
+        <item>GEMINI</item>
+        <item>POLONIEX</item>
+        <item>ZB</item>
+        <item>BITTREX</item>
+        <item>KUCOIN</item>
+        <item>OKEX</item>
+        <item>BITFINEX</item>
+        <item>HUOBI</item>
+    </string-array>
+    <string-array name="news_type_array">
+        <item>General</item>
+        <item>Forex</item>
+        <item>Crypto</item>
+        <item>Merger</item>
+    </string-array>
+
 </resources>

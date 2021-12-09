@@ -14,28 +14,30 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginScreenViewModel @Inject constructor(private val authInteractor: AuthInteractor): ViewModel() {
+class LoginScreenViewModel @Inject constructor(private val authInteractor: AuthInteractor) : ViewModel() {
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<LoginScreenViewState> = MutableStateFlow(LoginScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<LoginScreenViewState> = MutableStateFlow(LoginScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<LoginOneShotEvent>(Channel.BUFFERED)
     val oneShotEvent = _oneShotEvents.receiveAsFlow()
 
 
-
-    fun onAction(loginUiAction: LoginUiAction){
-        when(loginUiAction){
-            is LoginUiAction.OnLogin ->{
+    fun onAction(loginUiAction: LoginUiAction) {
+        when (loginUiAction) {
+            is LoginUiAction.OnLogin -> {
                 coroutineScope.launch {
                     _viewState.value = _viewState.value.copy(isLoading = true)
-                    val message = withContext(Dispatchers.IO) { authInteractor.login(loginUiAction.email, loginUiAction.passwd) }
-                    if (message == "Login successful!") {
-                        _oneShotEvents.send(LoginOneShotEvent.NavigateToStockList)
-                    } else {
-                        _viewState.value = _viewState.value.copy(errorText = message)
-                        _oneShotEvents.send(LoginOneShotEvent.ShowToastMessage)
+                    if(loginUiAction.email.isNotBlank() && loginUiAction.passwd.isNotBlank()) {
+                        val message = withContext(Dispatchers.IO) { authInteractor.login(loginUiAction.email, loginUiAction.passwd) }
+                        if (message == "Login successful!") {
+                            _oneShotEvents.send(LoginOneShotEvent.NavigateToStockList)
+                        } else {
+                            _oneShotEvents.send(LoginOneShotEvent.ShowToastMessage(message))
+                        }
+                    }else{
+                        _oneShotEvents.send(LoginOneShotEvent.ShowToastMessage("One or more text fields are empty!"))
                     }
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }

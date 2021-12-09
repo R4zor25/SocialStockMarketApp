@@ -22,18 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import hu.bme.aut.android.socialstockmarketapp.R
+import hu.bme.aut.android.socialstockmarketapp.navigation.StockScreen
 import hu.bme.aut.android.socialstockmarketapp.ui.auth.registration.BgCard
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
@@ -57,7 +58,7 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
-
+/*
 @ExperimentalComposeUiApi
 @InternalCoroutinesApi
 @Preview(showBackground = true)
@@ -71,6 +72,8 @@ fun LoginScreenPreview() {
         )
     }
 }
+
+ */
 
 @Composable
 fun BgCard() {
@@ -98,10 +101,10 @@ fun MainCardLogin(navController: NavController, viewModel: LoginScreenViewModel)
         viewModel.oneShotEvent
             .onEach {
                 when (it) {
-                    LoginOneShotEvent.NavigateToStockList -> navController.navigate("stocklist_screen"){
+                    LoginOneShotEvent.NavigateToStockList -> navController.navigate(StockScreen.StockListScreen.route) {
                         navController.popBackStack()
                     }
-                    LoginOneShotEvent.ShowToastMessage -> Toast.makeText(context, viewState.value.errorText, Toast.LENGTH_LONG).show()
+                    is LoginOneShotEvent.ShowToastMessage -> Toast.makeText(context, it.errorText, Toast.LENGTH_LONG).show()
                     else -> {
                     }
                 }
@@ -125,20 +128,29 @@ fun MainCardLogin(navController: NavController, viewModel: LoginScreenViewModel)
             )
             Spacer(modifier = Modifier.padding(16.dp))
             if (!viewState.value.isLoading) {
+                /*
                 ClickableText(
-                    text = AnnotatedString("Sign In"), onClick = {
+                    text = AnnotatedString(stringResource(R.string.sing_in)), onClick = {
                         email = "demetermate@gmail.com"
                         passwd = "testtest"
                         viewModel.onAction(LoginUiAction.OnLogin(email, passwd))
                     },
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally),
-                            style = TextStyle (
-                            color = Color.Black,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight(700),
-                    textDecoration = TextDecoration.Underline
-                ))
+                    style = TextStyle(
+                        color = Color.Black,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight(700),
+                        //textDecoration = TextDecoration.Underline
+                    )
+                )
+                 */
+                Text(
+                    "Sign In", modifier = Modifier.align(Alignment.CenterHorizontally), style = TextStyle(
+                        color = Color.Black,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight(700)
+                    ))
             } else
                 CircularIndeterminateProgressBar(isDisplayed = viewState.value.isLoading)
             Spacer(modifier = Modifier.padding(16.dp))
@@ -150,11 +162,11 @@ fun MainCardLogin(navController: NavController, viewModel: LoginScreenViewModel)
                         shape = RoundedCornerShape(40.dp)
                     )
                     .padding(horizontal = 12.dp, vertical = 0.dp),
-                leadingIcon = { Icon(Icons.Filled.Email, "contentDescription") },
+                leadingIcon = { Icon(Icons.Filled.Email, "") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Email),
                 onTextChange = { email = it },
                 text = email,
-                hint = "Email",
+                hint = stringResource(R.string.email),
                 passwordVisibility = true,
                 getPasswordVisibility = { true }
             )
@@ -173,20 +185,18 @@ fun MainCardLogin(navController: NavController, viewModel: LoginScreenViewModel)
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
                     IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
-                        Icon(image, "contentDescription")
+                        Icon(image, "")
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Text),
                 onTextChange = { passwd = it },
                 text = passwd,
-                hint = "Password",
+                hint = stringResource(R.string.password),
                 passwordVisibility = false,
                 getPasswordVisibility = { passwordVisibility }
             )
             ClickableText(
-                text = AnnotatedString("Registration"), onClick = {
-                    navController.navigate("registration_screen")
-                },
+                text = AnnotatedString(stringResource(R.string.registration)), onClick = { navController.navigate(StockScreen.RegistrationScreen.route) },
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(8.dp, 4.dp),
@@ -210,11 +220,9 @@ fun MainCardLogin(navController: NavController, viewModel: LoginScreenViewModel)
                 ),
                 contentPadding = PaddingValues(4.dp)
             ) {
-                Text(text = "Login", fontSize = 24.sp, color = Color.Black)
+                Text(text = stringResource(R.string.login), fontSize = 24.sp, color = Color.Black)
             }
             Spacer(modifier = Modifier.padding(vertical = 12.dp))
         }
     }
 }
-//TODO Leading Icon, Password field, Loading ProgressBar, StockListScreen,
-//TODO Registration_screen button, maybe fast login with LongClick

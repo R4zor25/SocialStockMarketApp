@@ -17,11 +17,11 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class CompanyNewsScreenViewModel @Inject constructor(): ViewModel() {
+class CompanyNewsScreenViewModel @Inject constructor() : ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<CompanyNewsScreenViewState> = MutableStateFlow(CompanyNewsScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<CompanyNewsScreenViewState> = MutableStateFlow(CompanyNewsScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<CompanyNewsOneShotEvent>(Channel.BUFFERED)
@@ -39,17 +39,17 @@ class CompanyNewsScreenViewModel @Inject constructor(): ViewModel() {
         }
     }
 
-    fun onAction(companyNewsUiAction: CompanyNewsUiAction){
-        when(companyNewsUiAction){
-            is CompanyNewsUiAction.OnInit ->{
+    fun onAction(companyNewsUiAction: CompanyNewsUiAction) {
+        when (companyNewsUiAction) {
+            is CompanyNewsUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     val pattern = "yyyy-MM-dd"
                     val simpleDateFormat = SimpleDateFormat(pattern)
-                    val lastyear: String = calcLastYear()
+                    val lastYear: String = calcLastYear()
                     val date: String = simpleDateFormat.format(Date())
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
-                    companyNewsList = apiClient.companyNews(stockSymbol, from = lastyear, to = date )
+                    companyNewsList = apiClient.companyNews(stockSymbol, from = lastYear, to = date)
                     _oneShotEvents.send(CompanyNewsOneShotEvent.CompanyNewsReceived(companyNewsList))
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }

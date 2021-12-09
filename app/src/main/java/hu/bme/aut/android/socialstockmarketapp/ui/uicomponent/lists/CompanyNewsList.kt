@@ -22,7 +22,6 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import io.finnhub.api.models.CompanyNews
-import io.finnhub.api.models.MarketNews
 import java.time.Instant
 import java.time.ZoneId
 
@@ -53,7 +52,9 @@ fun CompanyNewsRowItem(companyNews: CompanyNews, onRowItemClick: (String) -> Uni
         ) {
             Column() {
                 Row() {
-                    Text(text = companyNews.headline.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp))
+                    Text(text = companyNews.headline.toString(), fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp),
+                        color = Color.Black)
                 }
                 Row {
                     Column(
@@ -67,14 +68,22 @@ fun CompanyNewsRowItem(companyNews: CompanyNews, onRowItemClick: (String) -> Uni
                             modifier = Modifier.size(100.dp)
                                 .padding(start = 12.dp, top = 12.dp)
                         )
-                        Text(text = "Category: " + companyNews.category.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp, top = 8.dp))
-                        Text(text = "Source: " + companyNews.source.toString(), fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp))
+                        Text(text = "Category: " + companyNews.category.toString(), fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp, top = 8.dp),
+                            color = Color.Black)
+                        Text(text = "Source: " + companyNews.source.toString(), fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp),
+                            color = Color.Black)
                         Text(text = Instant.ofEpochSecond(companyNews.datetime!!)
                             .atZone(ZoneId.systemDefault())
-                            .toLocalDateTime().toString().replace("T", " "), fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp))
+                            .toLocalDateTime().toString().replace("T", " "), fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 6.dp),
+                            color = Color.Black)
                     }
                     Column() {
-                        Text(text = companyNews.summary.toString(), fontSize = 16.sp, modifier = Modifier.padding(top = 12.dp, start = 4.dp))
+                        Text(text = companyNews.summary.toString(), fontSize = 16.sp,
+                            modifier = Modifier.padding(top = 12.dp, start = 4.dp),
+                            color = Color.Black)
                     }
                 }
             }
@@ -85,13 +94,14 @@ fun CompanyNewsRowItem(companyNews: CompanyNews, onRowItemClick: (String) -> Uni
 @Composable
 @Preview
 fun CompanyNewsRowItemPreview() {
-    StockNewsRowItem(
-        onRowItemClick = {}, stockNews = MarketNews(
+    CompanyNewsRowItem(
+        onRowItemClick = {}, companyNews = CompanyNews(
             headline = "Square surges after reporting 64% jump in revenue, more customers using Cash App",
             image = "https://image.cnbcfm.com/api/v1/image/105569283-1542050972462rts25mct.jpg?v=1542051069",
             summary = "Shares of Square soared on Tuesday evening after posting better-than-expected quarterly results and strong growth in its consumer payments app.",
             category = "technology",
-            source = "CNBC"
+            source = "CNBC",
+            datetime = 12312312312
         )
     )
 }

@@ -1,6 +1,7 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.followedstocks
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -16,14 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist.ValueAutoCompleteItem
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteBox
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteSearchBarTag
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.ValueAutoCompleteString
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.asAutoCompleteEntities
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists.FollowedStocksList
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
@@ -69,10 +72,9 @@ fun FollowedStocksScreen(navController: NavController, userName: String){
                     }
                     is FollowedStocksOneShotEvent.AcquireUserName -> {
                         followedStocksScreenViewModel.userName = userName
-                        followedStocksScreenViewModel.onAction(FollowedStocksUiAction.OnInit())
+                        followedStocksScreenViewModel.onAction(FollowedStocksUiAction.OnInit)
                     }
-                    else -> {
-                    }
+                    else -> { }
                 }
             }
             .collect()
@@ -80,18 +82,18 @@ fun FollowedStocksScreen(navController: NavController, userName: String){
     Scaffold(
         modifier = Modifier,
         scaffoldState = scaffoldState,
-        topBar = { TopBar("Stock List", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+        topBar = { TopBar(stringResource(R.string.followed_stock_list), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
         drawerBackgroundColor = Color.White,
         drawerContent = {
             NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
         }, content = { _ ->
-            Column() {
+            Column(modifier = Modifier.background(Color.White)) {
                 if(!viewState.value.isLoading){
                     Row() {
                         AutoCompleteBox(
                             items = autoCompleteEntities,
                             itemContent = { item ->
-                                ValueAutoCompleteItem(item.value)
+                                ValueAutoCompleteString(item.value)
                             }
                         ) {
                             val view = LocalView.current
@@ -100,7 +102,7 @@ fun FollowedStocksScreen(navController: NavController, userName: String){
                                 editTextValue = item.value
                                 filter(editTextValue)
                                 stockList = followedStocksScreenViewModel.stockSymbolList.filter {
-                                    it?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
+                                    it.lowercase(Locale.getDefault()).contains(editTextValue.lowercase())
                                 }
                                 view.clearFocus()
                             }
@@ -110,7 +112,7 @@ fun FollowedStocksScreen(navController: NavController, userName: String){
                                     .testTag(AutoCompleteSearchBarTag)
                                     .padding(start = 12.dp),
                                 value = editTextValue,
-                                label = "Search in Stock Titles",
+                                label = stringResource(R.string.search_in_stock_title),
                                 onDoneActionClick = {
                                     view.clearFocus()
                                 },
@@ -118,18 +120,19 @@ fun FollowedStocksScreen(navController: NavController, userName: String){
                                     editTextValue = ""
                                     filter(editTextValue)
                                     stockList = followedStocksScreenViewModel.stockSymbolList.filter {
-                                        it?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
+                                        it.lowercase(Locale.getDefault()).contains(editTextValue.lowercase()) ?: false
                                     }
                                     view.clearFocus()
                                 },
                                 onFocusChanged = { focusState ->
                                     isSearching = focusState.isFocused
+                                    filter(editTextValue)
                                 },
                                 onValueChanged = { query ->
                                     editTextValue = query
                                     filter(editTextValue)
                                     stockList = followedStocksScreenViewModel.stockSymbolList.filter {
-                                        it?.lowercase(Locale.getDefault())?.contains(editTextValue.lowercase()) ?: false
+                                        it.lowercase(Locale.getDefault()).contains(editTextValue.lowercase()) ?: false
                                     }
                                 }
                             )

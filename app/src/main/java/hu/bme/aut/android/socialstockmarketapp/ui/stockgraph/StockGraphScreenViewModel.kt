@@ -15,11 +15,11 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class StockGraphScreenViewModel @Inject constructor(): ViewModel() {
+class StockGraphScreenViewModel @Inject constructor() : ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<StockGraphScreenViewState> = MutableStateFlow(StockGraphScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<StockGraphScreenViewState> = MutableStateFlow(StockGraphScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<StockGraphOneShotEvent>(Channel.BUFFERED)
@@ -27,7 +27,7 @@ class StockGraphScreenViewModel @Inject constructor(): ViewModel() {
 
     val apiClient = DefaultApi()
 
-    var stockSymbol : String = ""
+    var stockSymbol: String = ""
 
 
     init {
@@ -36,9 +36,9 @@ class StockGraphScreenViewModel @Inject constructor(): ViewModel() {
         }
     }
 
-    fun onAction(stockGraphUiAction: StockGraphUiAction){
-        when(stockGraphUiAction){
-            is StockGraphUiAction.OnInit ->{
+    fun onAction(stockGraphUiAction: StockGraphUiAction) {
+        when (stockGraphUiAction) {
+            is StockGraphUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     ApiClient.apiKey["token"] = "c5p9hp2ad3idr38u7mb0"
@@ -46,15 +46,18 @@ class StockGraphScreenViewModel @Inject constructor(): ViewModel() {
                     val end = calendar.timeInMillis
                     calendar.add(Calendar.MONTH, -1)
                     val start = calendar.timeInMillis
-                    val candles = apiClient.stockCandles(stockSymbol, "60", start/1000, end/1000)
-                    _oneShotEvents.send(StockGraphOneShotEvent.StockCandlesDataReceived(candles))
+                    val candles = apiClient.stockCandles(stockSymbol, "60", start / 1000, end / 1000)
+                    if (candles.c != null && candles.o != null && candles.h != null && candles.l != null) {
+                        _viewState.value = _viewState.value.copy(dataAvailable = true)
+                        _oneShotEvents.send(StockGraphOneShotEvent.StockCandlesDataReceived(candles))
+                    }
                     _viewState.value = _viewState.value.copy(isLoading = false)
                 }
             }
-            is StockGraphUiAction.RefreshGraphData ->{
+            is StockGraphUiAction.RefreshGraphData -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
-                    val resolution = when(stockGraphUiAction.resolution){
+                    val resolution = when (stockGraphUiAction.resolution) {
                         "1 Minute" -> "1"
                         "5 Minutes" -> "5"
                         "15 Minutes" -> "15"
@@ -65,10 +68,19 @@ class StockGraphScreenViewModel @Inject constructor(): ViewModel() {
                         "Monthly" -> "M"
                         else -> "60"
                     }
-                    val candles = apiClient.stockCandles(stockSymbol, resolution,
-                        stockGraphUiAction.startDateTimeStamp/1000, stockGraphUiAction.endDateTimeStamp/1000)
+                    val candles = apiClient.stockCandles(
+                        stockSymbol, resolution,
+                        stockGraphUiAction.startDateTimeStamp / 1000, stockGraphUiAction.endDateTimeStamp / 1000
+                    )
                     _oneShotEvents.send(StockGraphOneShotEvent.StockCandlesDataReceived(candles))
                     _viewState.value = _viewState.value.copy(isLoading = false)
+                }
+            }
+            is StockGraphUiAction.RedrawGraphData -> {
+                coroutineScope.launch(Dispatchers.IO) {
+                    _viewState.value = _viewState.value.copy(redrawNeeded = true)
+                    Thread.sleep(200)
+                    _viewState.value = _viewState.value.copy(redrawNeeded = false)
                 }
             }
         }

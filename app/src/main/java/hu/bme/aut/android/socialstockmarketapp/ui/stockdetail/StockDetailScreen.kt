@@ -1,5 +1,6 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.stockdetail
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,17 +8,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,10 +28,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.StockDetailRowItem
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
 import io.finnhub.api.models.CompanyProfile2
 import io.finnhub.api.models.Quote
 import kotlinx.coroutines.flow.collect
@@ -43,12 +45,13 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
     val stockDetailViewModel = hiltViewModel<StockDetailScreenViewModel>()
-    val scaffoldState = rememberScaffoldState()
+    val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
     val viewState = stockDetailViewModel.viewState.collectAsState()
     var companyProfile by rememberSaveable { mutableStateOf(CompanyProfile2()) }
     var quote by rememberSaveable { mutableStateOf(Quote()) }
-    var buttonText by rememberSaveable { mutableStateOf("Follow stock")}
+    var buttonText by rememberSaveable { mutableStateOf("Follow stock") }
+    val context = LocalContext.current
 
     LaunchedEffect("key") {
         stockDetailViewModel.oneShotEvent
@@ -60,15 +63,22 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                     }
                     is StockDetailOneShotEvent.CompanyInfoReceived -> {
                         companyProfile = it.companyProfile2
-                        if(it.contains)
+                        if (it.contains)
                             buttonText = "Unfollow stock"
                     }
                     is StockDetailOneShotEvent.QuoteInfoReceived -> {
                         quote = it.quote
                     }
-                    else -> {
-
+                    is StockDetailOneShotEvent.ShowToastMessage -> {
+                        Toast.makeText(context, it.toastMessage, Toast.LENGTH_LONG).show()
                     }
+                    is StockDetailOneShotEvent.FollowSuccessful -> {
+                        buttonText = "Unfollow stock"
+                    }
+                    is StockDetailOneShotEvent.UnfollowSuccessful -> {
+                        buttonText = "Follow stock"
+                    }
+                    else -> { }
                 }
             }
             .collect()
@@ -76,7 +86,12 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
 
     Scaffold(
         modifier = Modifier.background(Color.White),
-        topBar = { TopBar("Stock Details", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+        scaffoldState = scaffoldState,
+        topBar = { TopBar(stringResource(R.string.stock_details), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+        drawerBackgroundColor = Color.White,
+        drawerContent = {
+            NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
+        },
         content = {
             Column(
                 modifier = Modifier
@@ -87,14 +102,14 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
             ) {
                 if (!viewState.value.isLoading && !viewState.value.isDataAvailable) {
                     Text(
-                        "Stock data is not available for this company!", fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                        stringResource(R.string.stock_data_details_is_not_available_for_this_company), fontSize = 20.sp, fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                     )
                 } else if (!viewState.value.isLoading) {
                     Row(verticalAlignment = Alignment.Bottom) {
                         Surface(shape = RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp), color = MyBlue) {
                             Text(
-                                "General Company Information", fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                                stringResource(R.string.general_company_information), fontSize = 19.sp, fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                             )
                         }
@@ -163,13 +178,14 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                             Modifier
                                 .background(Color.White)
                                 .fillMaxWidth()
-                                .padding(top = 8.dp)) {
+                                .padding(top = 8.dp)
+                        ) {
                             Surface(shape = RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp), color = MyBlue) {
                                 Text(
-                                    "General Stock Information", fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                                    stringResource(R.string.general_stock_information), fontSize = 19.sp, fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                                 )
-                        }
+                            }
                         }
                         if (quote.c != null) {
                             Row(modifier = Modifier.padding(horizontal = 8.dp)) {
@@ -211,28 +227,26 @@ fun StockDetailScreen(navController: NavHostController, stockSymbol: String?) {
                             Modifier
                                 .background(Color.White)
                                 .fillMaxWidth()
-                                .padding(top = 8.dp)) {
+                                .padding(top = 8.dp)
+                        ) {
                             Surface(shape = RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp), color = MyBlue) {
                                 Text(
-                                    "Other Options", fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                                    stringResource(R.string.other_options), fontSize = 19.sp, fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                                 )
                             }
                         }
-                        
-                        StockDetailRowItem(title = "Company related news") { navController.navigate("companynews_screen/$stockSymbol")}
-                        StockDetailRowItem(title = "Company's social sentiment") {navController.navigate("stocksocialsentiment_screen/$stockSymbol")}
-                        StockDetailRowItem(title = "Stock graph") {navController.navigate("stockgraph_screen/$stockSymbol")}
-                        StockDetailRowItem(title = "Stock advice") { navController.navigate("stockadvice_screen/$stockSymbol") }
-                        StockDetailRowItem(title = "Conversation about stock") {navController.navigate("stockconversation_screen/$stockSymbol")}
+
+                        StockDetailRowItem(title = stringResource(R.string.company_related_news)) { navController.navigate("companynews_screen/$stockSymbol") }
+                        StockDetailRowItem(title = stringResource(R.string.companys_social_sentiment)) { navController.navigate("stocksocialsentiment_screen/$stockSymbol") }
+                        StockDetailRowItem(title = stringResource(R.string.stock_graph)) { navController.navigate("stockgraph_screen/$stockSymbol") }
+                        StockDetailRowItem(title = stringResource(R.string.stock_advice)) { navController.navigate("stockadvice_screen/$stockSymbol") }
+                        StockDetailRowItem(title = stringResource(R.string.conversation_about_stock)) { navController.navigate("stockconversation_screen/$stockSymbol") }
                         StockDetailRowItem(title = buttonText) {
-                            if(buttonText == "Follow stock") {
-                                if(stockDetailViewModel.followStock())
-                                    buttonText = "Unfollow stock"
-                            }
-                            else {
-                                if(stockDetailViewModel.unfollowStock())
-                                    buttonText = "Follow stock"
+                            if (buttonText == "Follow stock") {
+                                stockDetailViewModel.followStock()
+                            } else {
+                                stockDetailViewModel.unfollowStock()
                             }
                         }
 

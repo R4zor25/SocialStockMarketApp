@@ -1,5 +1,7 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete
 
+import android.os.Parcel
+
 typealias CustomFilter<T> = (T, String) -> Boolean
 
 fun <T> List<T>.asAutoCompleteEntities(filter: CustomFilter<T>): List<ValueAutoCompleteEntity<T>> {
@@ -9,6 +11,14 @@ fun <T> List<T>.asAutoCompleteEntities(filter: CustomFilter<T>): List<ValueAutoC
 
             override fun filter(query: String): Boolean {
                 return filter(value, query)
+            }
+
+            override fun describeContents(): Int {
+                return 0;
+            }
+
+            override fun writeToParcel(p0: Parcel?, p1: Int) {
+                p0?.writeValue(value);
             }
         }
     }

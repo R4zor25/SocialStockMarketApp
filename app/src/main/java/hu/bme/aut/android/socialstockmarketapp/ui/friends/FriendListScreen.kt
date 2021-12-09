@@ -15,10 +15,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.SocialStockMarketAppTheme
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.AddFriendDialog
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
@@ -69,7 +73,7 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
         viewModel.oneShotEvent
             .onEach {
                 when (it) {
-                    FriendListOneShotEvent.DataReceived -> {
+                   is FriendListOneShotEvent.FriendListReceived -> {
                         friends = viewModel.friendList
                         pendingRequests = viewModel.pendingFriendList
                         outgoingRequests = viewModel.outgoingFriendList
@@ -87,10 +91,10 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
         .background(Color.White),
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = { showCustomDialogWithResult = !showCustomDialogWithResult },
-                text = { Text(text = "Add Friend") },
+                text = { Text(text = stringResource(R.string.add_friend)) },
                 icon = { Icon(Icons.Filled.Add, "") })
         }) {
-        Column( // TODO SZÉTSZEDNI 3 SCREEN_RE vagy csak rakni egy választót felülre és úgy frissítgetni a tartalmat, mindegyik ugyanazon a viewModelen elég
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
@@ -108,43 +112,49 @@ fun MainCardFriendList(navController: NavController, viewModel: FriendListScreen
             if (viewState.value.isLoading)
                 CircularIndeterminateProgressBar(isDisplayed = true)
             else {
-                Spacer(modifier = Modifier.padding(8.dp))
-                FriendList(
-                    items = friends,
-                    stickyHeaderText = "Friends",
-                    isPending = false,
-                    alreadyFriend = true,
-                    onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
-                    onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
-                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) },
-                    openFollowedStocks = { navController.navigate("followedstocks_screen/$it") }
-                )
+                Text(text = stringResource(R.string.friends), color = Color.Black, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp), fontSize = 18.sp)
+                Row(modifier = Modifier.weight(0.3f)) {
+                    FriendList(
+                        items = friends,
+                        isPending = false,
+                        alreadyFriend = true,
+                        onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
+                        onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
+                        onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) },
+                        openFollowedStocks = { navController.navigate("followedstocks_screen/$it") }
+                    )
+                }
             }
             if (viewState.value.isLoading)
                 CircularIndeterminateProgressBar(isDisplayed = true)
             else {
-                Spacer(modifier = Modifier.padding(8.dp))
-                FriendList(items = pendingRequests,
-                    stickyHeaderText = "Pending friend requests",
-                    isPending = true,
-                    alreadyFriend = false,
-                    onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
-                    onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
-                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) },
-                    openFollowedStocks = { navController.navigate("followedstocks_screen/$it") })
+                Text(text = stringResource(R.string.incoming_friend_requests), color = Color.Black, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp), fontSize = 18.sp)
+                Row(modifier = Modifier.weight(0.3f)) {
+                    FriendList(items = pendingRequests,
+                        isPending = true,
+                        alreadyFriend = false,
+                        onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
+                        onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
+                        onDeleteFriend = { viewModel.onAction(FriendListUiAction.RemoveFriend(it)) },
+                        openFollowedStocks = { navController.navigate("followedstocks_screen/$it") })
+                }
             }
             if (viewState.value.isLoading)
                 CircularIndeterminateProgressBar(isDisplayed = true)
             else {
-                Spacer(modifier = Modifier.padding(8.dp))
-                FriendList(items = outgoingRequests,
-                    stickyHeaderText = "Outgoing friend requests",
-                    isPending = false,
-                    alreadyFriend = false,
-                    onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
-                    onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
-                    onDeleteFriend = { viewModel.onAction(FriendListUiAction.DeleteOutgoingRequest(it)) },
-                    openFollowedStocks = { navController.navigate("followedstocks_screen/$it") })
+                Text(text = stringResource(R.string.pending_friend_requests), color = Color.Black, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp), fontSize = 18.sp)
+                Row(modifier = Modifier.weight(0.3f)) {
+                    FriendList(items = outgoingRequests,
+                        isPending = false,
+                        alreadyFriend = false,
+                        onAcceptPending = { viewModel.onAction(FriendListUiAction.AcceptPending(it)) },
+                        onRefusePending = { viewModel.onAction(FriendListUiAction.RefusePending(it)) },
+                        onDeleteFriend = { viewModel.onAction(FriendListUiAction.DeleteOutgoingRequest(it)) },
+                        openFollowedStocks = { navController.navigate("followedstocks_screen/$it") })
+                }
             }
         }
     }

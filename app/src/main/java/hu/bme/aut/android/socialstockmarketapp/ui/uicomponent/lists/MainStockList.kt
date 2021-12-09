@@ -1,4 +1,4 @@
-package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent
+package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,9 +41,12 @@ fun StockListRowItem(onRowItemClick: (String) -> Unit, stockSymbol: StockSymbol)
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
             Column(modifier = Modifier.background(Color.Transparent)) {
-                Text(text = stockSymbol.description.toString() + " (${stockSymbol.symbol})", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp))
-                Text(text = "Stock type : ${stockSymbol.type.toString()}", modifier = Modifier.padding(start = 12.dp))
-                Text(text = "Currency : ${stockSymbol.currency.toString()}", modifier = Modifier.padding(start = 12.dp))
+                Text(text = stockSymbol.description.toString() + " (${stockSymbol.symbol})", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp),
+                color = Color.Black)
+                Text(text = "Stock type : ${stockSymbol.type.toString()}",
+                    modifier = Modifier.padding(start = 12.dp), color = Color.Black)
+                Text(text = "Currency : ${stockSymbol.currency.toString()}",
+                    modifier = Modifier.padding(start = 12.dp), color = Color.Black)
             }
 
         }

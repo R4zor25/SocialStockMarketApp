@@ -16,16 +16,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.vanpra.composematerialdialogs.MaterialDialogButtons
-import hu.bme.aut.android.socialstockmarketapp.ui.stocknewslist.ValueAutoCompleteItem
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteBox
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.AutoCompleteSearchBarTag
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.ValueAutoCompleteString
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete.asAutoCompleteEntities
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists.CompanyNewsList
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
@@ -49,6 +51,7 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
     val newsHeadlines by rememberSaveable { mutableStateOf(mutableListOf<String>()) }
     var editTextValue by rememberSaveable { mutableStateOf("") }
 
+    //Initializing autocomplete with newsHeadlines
     var autoCompleteEntities by rememberSaveable {
         mutableStateOf(newsHeadlines.asAutoCompleteEntities(
             filter = { item, query ->
@@ -61,10 +64,12 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
         companyNewsScreenViewModel.oneShotEvent
             .onEach {
                 when (it) {
+                    //passing stockSymbol to Viewmodel
                     is CompanyNewsOneShotEvent.AcquireSymbol -> {
                         companyNewsScreenViewModel.stockSymbol = companySymbol
-                        companyNewsScreenViewModel.onAction(CompanyNewsUiAction.OnInit())
+                        companyNewsScreenViewModel.onAction(CompanyNewsUiAction.OnInit)
                     }
+                    //Processing company news
                     is CompanyNewsOneShotEvent.CompanyNewsReceived -> {
                         companyNewsList = it.companyNews
                         newsHeadlines.clear()
@@ -87,20 +92,20 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
         Scaffold(
             modifier = Modifier.background(Color.White),
             scaffoldState = scaffoldState,
-            topBar = { TopBar("Company News", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+            topBar = { TopBar(stringResource(R.string.company_news), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
             drawerBackgroundColor = Color.White,
             drawerContent = {
                 NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
             },
             content = { _ ->
 
-                Column() {
+                Column(modifier = Modifier.background(Color.White)) {
                     Row() {
                         if (!viewState.value.isLoading) {
                             AutoCompleteBox(
                                 items = autoCompleteEntities,
                                 itemContent = { item ->
-                                    ValueAutoCompleteItem(item.value)
+                                    ValueAutoCompleteString(item.value)
                                 }
                             ) {
 
@@ -120,7 +125,7 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
                                         .testTag(AutoCompleteSearchBarTag)
                                         .padding(start = 12.dp),
                                     value = editTextValue,
-                                    label = "Search in Headline",
+                                    label = stringResource(R.string.search_in_headline),
                                     onDoneActionClick = {
                                         view.clearFocus()
                                     },
@@ -133,6 +138,7 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
                                     },
                                     onFocusChanged = { focusState ->
                                         isSearching = focusState.isFocused
+                                        filter(editTextValue)
 
                                     },
                                     onValueChanged = { query ->
@@ -149,7 +155,7 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
                     Row(
                         modifier = Modifier
                             .padding(bottom = 50.dp, top = 20.dp)
-                            .weight(0.8f)
+                            .weight(0.9f)
                     ) {
                         if (viewState.value.isLoading)
                             CircularIndeterminateProgressBar(isDisplayed = true)
@@ -168,8 +174,8 @@ fun CompanyNewsScreen(navController: NavController, companySymbol: String) {
 
 @Composable
 private fun MaterialDialogButtons.defaultDateTimeDialogButtons() {
-    positiveButton("Ok")
-    negativeButton("Cancel")
+    positiveButton(stringResource(R.string.ok))
+    negativeButton(stringResource(R.string.cancel))
 }
 
 @OptIn(ExperimentalAnimationApi::class)

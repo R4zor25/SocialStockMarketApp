@@ -3,25 +3,25 @@ package hu.bme.aut.android.socialstockmarketapp.ui.stocksocialsentiment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
+import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.navigationDrawer.NavigationDrawer
 import io.finnhub.api.models.SocialSentiment
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -29,16 +29,16 @@ import kotlinx.coroutines.flow.onEach
 @Composable
 fun StockSocialSentimentScreen(navController: NavController, companySymbol: String){
     val stockSocialSentimentViewModel = hiltViewModel<StockSocialSentimentScreenViewModel>()
-    val scaffoldState = rememberScaffoldState()
+    val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
     val scope = rememberCoroutineScope()
     val viewState = stockSocialSentimentViewModel.viewState.collectAsState()
     var socialSentiment by rememberSaveable { mutableStateOf(SocialSentiment()) }
-    var redditMention : MutableState<Long> = remember { mutableStateOf(0)}
-    var redditPositive : MutableState<Long> = remember { mutableStateOf(0)}
-    var redditNegative : MutableState<Long> = remember { mutableStateOf(0)}
-    var twitterMention : MutableState<Long> = remember { mutableStateOf(0)}
-    var twitterPositive : MutableState<Long> = remember { mutableStateOf(0)}
-    var twitterNegative : MutableState<Long> = remember { mutableStateOf(0)}
+    val redditMention : MutableState<Long> = remember { mutableStateOf(0)}
+    val redditPositive : MutableState<Long> = remember { mutableStateOf(0)}
+    val redditNegative : MutableState<Long> = remember { mutableStateOf(0)}
+    val twitterMention : MutableState<Long> = remember { mutableStateOf(0)}
+    val twitterPositive : MutableState<Long> = remember { mutableStateOf(0)}
+    val twitterNegative : MutableState<Long> = remember { mutableStateOf(0)}
 
     LaunchedEffect("key") {
         stockSocialSentimentViewModel.oneShotEvent
@@ -52,19 +52,19 @@ fun StockSocialSentimentScreen(navController: NavController, companySymbol: Stri
                         socialSentiment = it.socialSentiment
                         if(socialSentiment.reddit != null) {
                             for (reddit in socialSentiment.reddit!!){
-                                reddit.let {
-                                    redditMention.value += it.mention!!
-                                    redditNegative.value += it.negativeMention!!
-                                    redditPositive.value += it.positiveMention!!
+                                reddit.let { sentiment ->
+                                    redditMention.value += sentiment.mention!!
+                                    redditNegative.value += sentiment.negativeMention!!
+                                    redditPositive.value += sentiment.positiveMention!!
                                 }
                             }
                         }
                         if(socialSentiment.twitter != null) {
                             for (twitter in socialSentiment.twitter!!){
-                                twitter.let {
-                                    twitterMention.value += it.mention!!
-                                    twitterNegative.value += it.negativeMention!!
-                                    twitterPositive.value += it.positiveMention!!
+                                twitter.let { sentiment ->
+                                    twitterMention.value += sentiment.mention!!
+                                    twitterNegative.value += sentiment.negativeMention!!
+                                    twitterPositive.value += sentiment.positiveMention!!
                                 }
                             }
                         }
@@ -78,7 +78,12 @@ fun StockSocialSentimentScreen(navController: NavController, companySymbol: Stri
 
     Scaffold(
         modifier = Modifier.background(Color.White),
-        topBar = { TopBar("Social Sentiment", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+        scaffoldState = scaffoldState,
+        topBar = { TopBar(stringResource(R.string.stock_social_sentiment), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+        drawerBackgroundColor = Color.White,
+        drawerContent = {
+            NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
+        },
         content = {
         Column(
             modifier = Modifier
@@ -90,7 +95,7 @@ fun StockSocialSentimentScreen(navController: NavController, companySymbol: Stri
                 Row(verticalAlignment = Alignment.Bottom) {
                     Surface(shape = RoundedCornerShape(topEnd = 20.dp, topStart = 20.dp), color = MyBlue) {
                         Text(
-                            "Reddit", fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                            stringResource(R.string.reddit), fontSize = 19.sp, fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                         )
                     }
@@ -122,14 +127,14 @@ fun StockSocialSentimentScreen(navController: NavController, companySymbol: Stri
                     ) {
                         Surface(shape = RoundedCornerShape(topEnd = 20.dp, topStart = 20.dp), color = MyBlue) {
                             Text(
-                                "Twitter", fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                                stringResource(R.string.twitter), fontSize = 19.sp, fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                             )
                         }
                     }
 
                     Row(modifier = Modifier.padding(horizontal = 8.dp)) {
-                        Text(text = "Twitter mentions: ", color = Color.Black, fontSize = 16.sp)
+                        Text(text = "Mentions: ", color = Color.Black, fontSize = 16.sp)
                         Text(text = "${twitterMention.value}", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                     Row(modifier = Modifier.padding(horizontal = 8.dp)) {

@@ -2,9 +2,7 @@ package hu.bme.aut.android.socialstockmarketapp.ui.friends
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import hu.bme.aut.android.socialstockmarketapp.domain.AuthInteractor
 import hu.bme.aut.android.socialstockmarketapp.domain.FriendInteractor
-import hu.bme.aut.android.socialstockmarketapp.network.StockApiService
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,8 +13,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendListScreenViewModel @Inject constructor(
-    private val authInteractor: AuthInteractor,
-    private val stockApiService: StockApiService,
     private val friendInteractor: FriendInteractor
 ) : ViewModel() {
 
@@ -44,16 +40,18 @@ class FriendListScreenViewModel @Inject constructor(
 
     fun onAction(friendListUiAction: FriendListUiAction) {
         when (friendListUiAction) {
+            //Initial get friends for current user
             is FriendListUiAction.LoadFriends -> {
                 coroutineScope.launch {
                     _viewState.value =  _viewState.value.copy(isLoading = true)
                     friendList = friendInteractor.getFriendsForCurrentUser() as ArrayList<String>
                     pendingFriendList = friendInteractor.getPendingFriendsForCurrentUser() as ArrayList<String>
                     outgoingFriendList = friendInteractor.getOutgoingForCurrentUser() as ArrayList<String>
-                    _oneShotEvents.send(FriendListOneShotEvent.DataReceived)
+                    _oneShotEvents.send(FriendListOneShotEvent.FriendListReceived)
                     _viewState.value =  _viewState.value.copy(isLoading = false)
                 }
             }
+            //Handling edge cases of sending friend request
             is FriendListUiAction.SendFriendRequest -> {
                 coroutineScope.launch {
                     _viewState.value =  _viewState.value.copy(isLoading = true)
@@ -92,7 +90,7 @@ class FriendListScreenViewModel @Inject constructor(
                     _viewState.value =  _viewState.value.copy(isLoading = true)
                     friendInteractor.removeFriend(userName = friendListUiAction.userName)
                     friendList = friendInteractor.getFriendsForCurrentUser() as ArrayList<String>
-                    _oneShotEvents.send(FriendListOneShotEvent.DataReceived)
+                    _oneShotEvents.send(FriendListOneShotEvent.FriendListReceived)
                     _viewState.value =  _viewState.value.copy(isLoading = false)
                 }
             }
@@ -103,7 +101,7 @@ class FriendListScreenViewModel @Inject constructor(
                     friendInteractor.addFriend(userName = friendListUiAction.userName)
                     pendingFriendList = friendInteractor.getPendingFriendsForCurrentUser() as ArrayList<String>
                     friendList = friendInteractor.getFriendsForCurrentUser() as ArrayList<String>
-                    _oneShotEvents.send(FriendListOneShotEvent.DataReceived)
+                    _oneShotEvents.send(FriendListOneShotEvent.FriendListReceived)
                     _viewState.value =  _viewState.value.copy(isLoading = false)
                 }
             }
@@ -112,7 +110,7 @@ class FriendListScreenViewModel @Inject constructor(
                     _viewState.value =  _viewState.value.copy(isLoading = true)
                     friendInteractor.removePending(userName = friendListUiAction.userName)
                     pendingFriendList = friendInteractor.getPendingFriendsForCurrentUser() as ArrayList<String>
-                    _oneShotEvents.send(FriendListOneShotEvent.DataReceived)
+                    _oneShotEvents.send(FriendListOneShotEvent.FriendListReceived)
                     _viewState.value =  _viewState.value.copy(isLoading = false)
                 }
             }
@@ -121,7 +119,7 @@ class FriendListScreenViewModel @Inject constructor(
                     _viewState.value =  _viewState.value.copy(isLoading = true)
                     friendInteractor.deleteOutgoingRequestTo(userName = friendListUiAction.userName)
                     outgoingFriendList = friendInteractor.getOutgoingForCurrentUser() as ArrayList<String>
-                    _oneShotEvents.send(FriendListOneShotEvent.DataReceived)
+                    _oneShotEvents.send(FriendListOneShotEvent.FriendListReceived)
                     _viewState.value =  _viewState.value.copy(isLoading = false)
                 }
             }

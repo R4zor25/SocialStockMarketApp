@@ -27,8 +27,8 @@ import hu.bme.aut.android.socialstockmarketapp.ui.theme.MyBlue
 
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
-fun SpinnerView(dropDownList: MutableList<String>, onSpinnerItemSelected : (String) -> Unit, spinnerTitle: String) {
-    var sampleName: String by rememberSaveable { mutableStateOf(dropDownList[0]) }
+fun SpinnerView(dropDownList: MutableList<String>, onSpinnerItemSelected : (String) -> Unit, spinnerTitle: String, currentValue: String?) {
+    var sampleName: String by rememberSaveable { mutableStateOf(currentValue ?: dropDownList[0]) }
     var expanded by remember { mutableStateOf(false) }
     val transitionState = remember {
         MutableTransitionState(expanded).apply {
@@ -56,13 +56,13 @@ fun SpinnerView(dropDownList: MutableList<String>, onSpinnerItemSelected : (Stri
             ) {
                 Row(
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(text = spinnerTitle, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(text = spinnerTitle, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                     }
                     Column(modifier = Modifier
                         .clickable {

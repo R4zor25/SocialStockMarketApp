@@ -13,17 +13,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class StockConversationScreenViewModel @Inject constructor(
     private val conversationInteractor: ConversationInteractor,
     private val authInteractor: AuthInteractor
-): ViewModel() {
+) : ViewModel() {
 
     private val coroutineScope = MainScope()
 
-    private val _viewState: MutableStateFlow<StockConversationScreenViewState> = MutableStateFlow(StockConversationScreenViewState(errorText = ""))
+    private val _viewState: MutableStateFlow<StockConversationScreenViewState> = MutableStateFlow(StockConversationScreenViewState())
     val viewState = _viewState.asStateFlow()
 
     private val _oneShotEvents = Channel<StockConversationOneShotEvent>(Channel.BUFFERED)
@@ -40,9 +42,9 @@ class StockConversationScreenViewModel @Inject constructor(
         }
     }
 
-    fun onAction(stockConversationUiAction: StockConversationUiAction){
-        when(stockConversationUiAction){
-            is StockConversationUiAction.OnInit ->{
+    fun onAction(stockConversationUiAction: StockConversationUiAction) {
+        when (stockConversationUiAction) {
+            is StockConversationUiAction.OnInit -> {
                 coroutineScope.launch(Dispatchers.IO) {
                     _viewState.value = _viewState.value.copy(isLoading = true)
                     val conversationComments = conversationInteractor.getConversationForStock(companySymbol)
@@ -57,9 +59,10 @@ class StockConversationScreenViewModel @Inject constructor(
                         ConversationComment(
                             authInteractor.getCurrentUserName().toString(),
                             stockConversationUiAction.message,
-                            "2000-02-02",
+                            SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date()),
                         ),
-                        companySymbol)
+                        companySymbol
+                    )
                     val conversationComments = conversationInteractor.getConversationForStock(companySymbol)
                     _oneShotEvents.send(StockConversationOneShotEvent.CommentsReceived(conversationComments))
                     _viewState.value = _viewState.value.copy(isLoading = false)

@@ -1,9 +1,10 @@
 package hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.autocomplete
 
+import android.os.Parcelable
 import androidx.compose.runtime.Stable
 
 @Stable
-interface AutoCompleteEntity {
+interface AutoCompleteEntity: Parcelable {
     fun filter(query: String): Boolean
 }
 

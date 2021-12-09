@@ -11,11 +11,13 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import hu.bme.aut.android.socialstockmarketapp.R
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.CircularIndeterminateProgressBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.TopBar
 import hu.bme.aut.android.socialstockmarketapp.ui.uicomponent.lists.RecommendationTrendList
@@ -44,8 +46,7 @@ fun StockAdviceScreen(navController: NavController, companySymbol: String ){
                     is StockAdviceOneShotEvent.RecommendationTrendReceived -> {
                         recommendationTrendList = it.recommendationTrendList
                     }
-                    else -> {
-                    }
+                    else -> { }
                 }
             }
             .collect()
@@ -56,7 +57,7 @@ fun StockAdviceScreen(navController: NavController, companySymbol: String ){
             backgroundColor = Color.White,
             modifier = Modifier.background(Color.White),
             scaffoldState = scaffoldState,
-            topBar = { TopBar("Recommendation trends", buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
+            topBar = { TopBar(stringResource(R.string.recommendation_trends), buttonIcon = Icons.Filled.Menu, scope, scaffoldState) },
             drawerBackgroundColor = Color.White,
             drawerContent = {
                 NavigationDrawer(navController = navController, scaffoldState = scaffoldState, scope)
@@ -74,7 +75,7 @@ fun StockAdviceScreen(navController: NavController, companySymbol: String ){
                             RecommendationTrendList(recommendationTrendList = recommendationTrendList, listState = listState)
                         else
                             Text(
-                                "Recommendation trend is not available for this stock!", fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                                stringResource(R.string.recommendation_trend_is_not_available_for_this_stock), fontSize = 20.sp, fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 6.dp), color = Color.Black
                             )
                     }

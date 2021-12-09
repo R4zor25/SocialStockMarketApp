@@ -4,7 +4,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import hu.bme.aut.android.socialstockmarketapp.domain.model.Conversation
 import hu.bme.aut.android.socialstockmarketapp.domain.model.ConversationComment
 import kotlinx.coroutines.tasks.await
@@ -13,9 +12,8 @@ import javax.inject.Inject
 class FirebaseDataSource @Inject constructor() {
     private var db = Firebase.firestore
     private var firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var storage = Firebase.storage.reference
 
-    fun getCurrentUserEmail(): String{
+    fun getCurrentUserEmail(): String {
         return firebaseAuth.currentUser?.email!!
     }
 
@@ -26,10 +24,10 @@ class FirebaseDataSource @Inject constructor() {
     suspend fun createUser(email: String, userName: String, password: String): String {
         var message: String = ""
         val isTaken = isUserNameTaken(userName)
-        if(isTaken){
-            return "Username already taken"
+        if (isTaken) {
+            return "Username already taken!"
         }
-        try{
+        try {
             firebaseAuth
                 .createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener { result ->
@@ -38,22 +36,20 @@ class FirebaseDataSource @Inject constructor() {
                         .setDisplayName(userName)
                         .build()
                     firebaseUser?.updateProfile(profileChangeRequest)
-
-
                     addUserToDatabase(userName, email)
                     message = "Registration successful!"
                 }
                 .addOnFailureListener { exception ->
-                    message = exception.localizedMessage
-
+                    message = exception.localizedMessage ?: "Something went wrong!"
                 }.await()
 
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
+            return e.localizedMessage
         }
 
         return message
     }
+
     private suspend fun isUserNameTaken(userName: String): Boolean {
         val query = db.collection("Users")
             .whereEqualTo("username", userName).get().await()
@@ -71,30 +67,28 @@ class FirebaseDataSource @Inject constructor() {
         db.collection("Users").add(data)
     }
 
-    private suspend fun getUserEmail(userName: String): String{
+    private suspend fun getUserEmail(userName: String): String {
         val query = db.collection("Users")
             .whereEqualTo("username", userName).get().await()
-        if(query.isEmpty)
+        if (query.isEmpty)
             throw RuntimeException("No such user")
         return query.documents[0]?.get("email") as String
     }
 
     suspend fun login(email: String, password: String): String {
         var message: String = ""
-        try{
+        try {
             firebaseAuth
                 .signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
                     message = "Login successful!"
                 }
                 .addOnFailureListener { exception ->
-                    message = exception.localizedMessage ?: "sasasa"
+                    message = exception.localizedMessage ?: "Cannot reach login server!"
                 }.await()
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
             return e.localizedMessage
         }
-
         return message
     }
 
@@ -113,7 +107,7 @@ class FirebaseDataSource @Inject constructor() {
         deleteFriendFromSideOf(userName, currUser)
     }
 
-    private suspend fun deleteFriendFromSideOf(userName: String, deleteeUserName: String){
+    private suspend fun deleteFriendFromSideOf(userName: String, deleteeUserName: String) {
         val userDoc = db.collection("Users")
             .whereEqualTo("username", userName)
             .get()
@@ -154,7 +148,7 @@ class FirebaseDataSource @Inject constructor() {
         val query = db.collection("FriendRequests")
             .whereEqualTo("to", userName).get().await()
         val list = mutableListOf<String>()
-        for(doc in query){
+        for (doc in query) {
             list.add(doc["from"] as String)
         }
         return list
@@ -195,19 +189,19 @@ class FirebaseDataSource @Inject constructor() {
             .whereEqualTo("from", userName).get().await()
 
         val list = mutableListOf<String>()
-        for(doc in query){
+        for (doc in query) {
             list.add(doc["to"] as String)
         }
         return list
     }
 
-    suspend fun isFriend(userName: String) : Boolean{
+    suspend fun isFriend(userName: String): Boolean {
         val currUser = firebaseAuth.currentUser?.displayName
         val query = db.collection("Users")
             .whereEqualTo("username", currUser)
             .whereArrayContains("friends", userName)
             .get().await()
-        if(query.isEmpty)
+        if (query.isEmpty)
             return false
         return true
     }
@@ -222,7 +216,7 @@ class FirebaseDataSource @Inject constructor() {
             .whereEqualTo("to", currUser)
             .whereEqualTo("from", userName)
             .get().await()
-        if(query1.isEmpty && query2.isEmpty)
+        if (query1.isEmpty && query2.isEmpty)
             return false
         return true
 
@@ -233,11 +227,11 @@ class FirebaseDataSource @Inject constructor() {
             .whereEqualTo("username", userName)
             .get()
             .await()
-        if(userDoc.isEmpty) return false
+        if (userDoc.isEmpty) return false
         return true
     }
 
-    suspend fun followStock(userName: String, stockSymbol: String) {
+    suspend fun followStock(userName: String, stockSymbol: String): Boolean {
         val userDoc = db.collection("Users")
             .whereEqualTo("username", userName)
             .get()
@@ -245,14 +239,16 @@ class FirebaseDataSource @Inject constructor() {
             .documents[0]
 
         val stocks = userDoc["stocks"] as MutableList<String>
-        stocks.add(stockSymbol)
+        if (!stocks.contains(stockSymbol))
+            stocks.add(stockSymbol)
 
+        var followSuccess: Boolean = false
         db.collection("Users")
-            .document(userDoc.id).update("stocks", stocks.toList())
-            .await()
+            .document(userDoc.id).update("stocks", stocks.toList()).addOnSuccessListener { followSuccess = true }.await()
+        return followSuccess
     }
 
-    suspend fun unfollowStock(userName: String, stockSymbol: String) {
+    suspend fun unfollowStock(userName: String, stockSymbol: String): Boolean {
         val userDoc = db.collection("Users")
             .whereEqualTo("username", userName)
             .get()
@@ -260,11 +256,14 @@ class FirebaseDataSource @Inject constructor() {
             .documents[0]
 
         val stocks = userDoc["stocks"] as MutableList<String>
-        stocks.remove(stockSymbol)
+        if (stocks.contains(stockSymbol))
+            stocks.remove(stockSymbol)
 
+
+        var unfollowSuccess: Boolean = false
         db.collection("Users")
-            .document(userDoc.id).update("stocks", stocks.toList())
-            .await()
+            .document(userDoc.id).update("stocks", stocks.toList()).addOnSuccessListener { unfollowSuccess = true }.await()
+        return unfollowSuccess
     }
 
     suspend fun getStocksForUser(userName: String): List<String> {
@@ -274,24 +273,25 @@ class FirebaseDataSource @Inject constructor() {
         return query.documents[0]?.get("stocks") as List<String>
     }
 
-    suspend fun getConversationForStock(stockSymbol: String): MutableList<ConversationComment>{
+    suspend fun getConversationForStock(stockSymbol: String): MutableList<ConversationComment> {
         val query = db.collection("Conversations")
             .whereEqualTo("stockSymbol", stockSymbol).get().await()
         val conversationCommentList: MutableList<ConversationComment> = mutableListOf<ConversationComment>()
-        for(doc in query){
-            val conversation =  doc.toObject(Conversation::class.java)
-            for(comment in conversation.Comments)
+        for (doc in query) {
+            val conversation = doc.toObject(Conversation::class.java)
+            for (comment in conversation.Comments)
                 conversationCommentList.add(
                     ConversationComment(
-                    userName = comment["userName"].toString(),
+                        userName = comment["userName"].toString(),
                         date = comment["date"].toString(),
                         message = comment["message"].toString()
-                ))
+                    )
+                )
         }
         return conversationCommentList
-        }
+    }
 
-    suspend fun sendConversationComment(conversationComment: ConversationComment, stockSymbol: String ){
+    suspend fun sendConversationComment(conversationComment: ConversationComment, stockSymbol: String) {
         val data = hashMapOf(
             "userName" to conversationComment.userName,
             "message" to conversationComment.message,
@@ -301,11 +301,23 @@ class FirebaseDataSource @Inject constructor() {
             .whereEqualTo("stockSymbol", stockSymbol)
             .get()
             .await()
-            .documents[0]
-        val comments = userDoc["Comments"] as MutableList<HashMap<String, String>>
-        comments.add(data)
-        db.collection("Conversations")
-            .document(userDoc.id).update("Comments", comments).await()
-
+        if (!userDoc.isEmpty) {
+            val comments = userDoc.documents[0]["Comments"] as MutableList<HashMap<String, String>>
+            comments.add(data)
+            db.collection("Conversations")
+                .document(userDoc.documents[0].id).update("Comments", comments).await()
+        } else {
+            val documentData = hashMapOf(
+                "stockSymbol" to stockSymbol,
+                "Comments" to mutableListOf<HashMap<String, String>>(
+                    hashMapOf(
+                        "userName" to conversationComment.userName,
+                        "message" to conversationComment.message,
+                        "date" to conversationComment.date
+                    )
+                )
+            )
+            db.collection("Conversations").add(documentData)
+        }
     }
-    }
+}
